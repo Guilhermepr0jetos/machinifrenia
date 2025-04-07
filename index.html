@@ -1,1 +1,210 @@
-teste
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mods GTA San Andreas</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0d0d0d;
+      color: #eaeaea;
+    }
+
+    header {
+      background: #111;
+      padding: 20px;
+      border-bottom: 3px solid #00ffcc;
+    }
+
+    header h1 {
+      font-size: 28px;
+      color: #00ffcc;
+      text-align: center;
+    }
+
+    nav ul {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      margin-top: 10px;
+    }
+
+    nav ul li {
+      margin: 0 15px;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: #eaeaea;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    nav ul li a:hover {
+      color: #00ffcc;
+    }
+
+    main {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 20px;
+    }
+
+    section {
+      flex: 2;
+      padding: 20px;
+    }
+
+    section h2 {
+      margin-bottom: 15px;
+      border-bottom: 2px solid #00ffcc;
+      padding-bottom: 5px;
+    }
+
+    article {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      padding: 15px;
+    }
+
+    article h3 {
+      color: #00ffcc;
+      margin-bottom: 10px;
+    }
+
+    article a {
+      text-decoration: none;
+      color: #fff;
+      background: #00cc99;
+      padding: 8px 12px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    article a:hover {
+      background: #00997a;
+    }
+
+    aside {
+      flex: 1;
+      padding: 20px;
+      background-color: #111;
+    }
+
+    aside h2 {
+      border-bottom: 2px solid #00ffcc;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+
+    aside ul {
+      list-style: none;
+    }
+
+    aside ul li {
+      margin-bottom: 10px;
+    }
+
+    aside ul li a {
+      text-decoration: none;
+      color: #eaeaea;
+    }
+
+    aside ul li a:hover {
+      color: #00ffcc;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      background-color: #0a0a0a;
+      border-top: 2px solid #00ffcc;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        flex-direction: column;
+      }
+
+      nav ul {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      nav ul li {
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Mods GTA San Andreas</h1>
+    <nav>
+      <ul>
+        <li><a href="#">Início</a></li>
+        <li><a href="#">Trapaças</a></li>
+        <li><a href="#">Tutoriais</a></li>
+        <li><a href="#">Backups</a></li>
+        <li><a href="#">Cheats GTA 5</a></li>
+        <li><a href="#">Sobre</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>Últimos Mods</h2>
+
+      <article>
+        <h3>Honda CBR 1000RR-R 2020</h3>
+        <p>Uma moto super esportiva com gráficos HD realistas e som personalizado.</p>
+        <a href="#">Download</a>
+      </article>
+
+      <article>
+        <h3>Honda CG 160 Titan HRC Special Edition 2019</h3>
+        <p>Modelo brasileiro clássico com detalhes em alta qualidade e textura fiel ao real.</p>
+        <a href="#">Download</a>
+      </article>
+    </section>
+
+    <aside>
+      <h2>Categorias</h2>
+      <ul>
+        <li><a href="#">Veículos</a></li>
+        <li><a href="#">Armas</a></li>
+        <li><a href="#">Mapas</a></li>
+        <li><a href="#">CLEO Mods</a></li>
+        <li><a href="#">Skins</a></li>
+        <li><a href="#">Ferramentas</a></li>
+      </ul>
+    </aside>
+  </main>
+
+  <footer>
+    <p>&copy; 2008 - 2025 Mods GTA San Andreas - Todos os direitos reservados</p>
+  </footer>
+
+  <script>
+    // Exemplo simples de interação JS
+    document.querySelectorAll('nav a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        alert('Esta seção está em desenvolvimento!');
+      });
+    });
+  </script>
+</body>
+</html>
