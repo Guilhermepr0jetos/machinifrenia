@@ -13,12 +13,18 @@
         </a>
       </div>
     
-      <div style="width: 300px; height: 200px; background-color: lightblue;">
-        <canvas id="myChart"></canvas>
+      <div style="display: flex;">
+        <div style="width: 300px; height: 200px; background-color: lightblue;">
+          <canvas id="GSassinantes"></canvas>
+        </div>
+
+        <div style="width: 300px; height: 200px; background-color: lightblue;">
+          <canvas id="PlayPCassinaturas"></canvas>
+        </div>
       </div>
       
       <script>
-        new Chart(document.getElementById("myChart"), {
+        new Chart(document.getElementById("GSassinantes"), {
           type: 'line',
           data: {
             labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
@@ -37,6 +43,35 @@
               title: {
                 display: true,
                 text: 'Assinantes GameServXYZ'
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+
+        new Chart(document.getElementById("PlayPCassinaturas"), {
+          type: 'line',
+          data: {
+            labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+            datasets: [{
+              label: 'Assinantes (mês)',
+              data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+              borderColor: 'blue',
+              backgroundColor: 'rgba(0, 0, 255, 0.1)',
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: 'Assinantes PlayPc'
               }
             },
             scales: {
