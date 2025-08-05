@@ -129,9 +129,9 @@ fetchData().then(() => {
 async function fetchData() {
     try {
 		let newGameID =+ 1
-	    	let link = `https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/teste${newGameID}.html`;
+	    	let cdn = `https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/teste${newGameID}.html`;
             	//const created_at = item.created_at;
-            	const link = "rendergame/index.html?gamelinkid=" + link;
+            	const link = "rendergame/index.html?gamelinkid=" + cdn;
             	gamesData.push({ name: `Jogo ${newGameID}`, image: item.GameimageLink, description: "Descrição para testes", link: link });
 	    
         //const response = await fetch(apiUrl);
