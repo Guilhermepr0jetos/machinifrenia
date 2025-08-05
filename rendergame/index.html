@@ -50,9 +50,9 @@ function selectGameIdByCreatedAt(jsonData, createdAt) {
     // Substitui o marcador especial #ESPECIAL# por &&
     htmlContent = htmlContent.replace(/#ESPECIAL#/g, '&&');
 
-    iframe.contentDocument.write(htmlContent);
-    console.log(iframe.contentDocument.documentElement.outerHTML);
-    iframe.contentDocument.close();
+    iframe.src(htmlContent);
+    //console.log(iframe.contentDocument.documentElement.outerHTML);
+    //iframe.contentDocument.close();
 
     // Lista de domínios bloqueados
     const blockedSites = ['bloqueado.com', 'malicioso.net', 'www.example.com'];
