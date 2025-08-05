@@ -114,7 +114,7 @@ document.getElementById("endereçoPagina").textContent=window.location.href;
 //let colunaClone3 = document.querySelector(".menuPortfolio").cloneNode(true);
 
 // URL do seu servidor ou endpoint do banco de dados
-    const apiUrl = 'https://x8ki-letl-twmt.n7.xano.io/api:WR6EqIQR/games';
+    //const apiUrl = 'https://x8ki-letl-twmt.n7.xano.io/api:WR6EqIQR/games';
 
 let gameid;
 let teste;
@@ -128,19 +128,24 @@ fetchData().then(() => {
 
 async function fetchData() {
     try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        console.log("Dados obtidos do servidor:", data);
-        let gameid;
+		let newGameID += 1
+	    	let link = `https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/teste${newGameID}.html`;
+            	//const created_at = item.created_at;
+            	const link = "rendergame/index.html?gamelinkid=" + link;
+            	gamesData.push({ name: `Jogo ${newGameID}`, image: item.GameimageLink, description: "Descrição para testes", link: link });
+	    
+        //const response = await fetch(apiUrl);
+        //const data = await response.json();
+        //console.log("Dados obtidos do servidor:", data);
+        //let gameid;
 		//= getRecentHtmlGame(data);
         
         // Atualiza os links dos jogos com base nos valores de created_at
+	/*
         data.forEach(item => {
-            const created_at = item.created_at;
-            const link = "rendergame/index.html?gameid=" + created_at;
-            //gamesData.push({ name: "Jogo 1", image: item.GameimageLink, description: "Descrição para testes", link: link });
+	    
         });
-        
+        */
         
     } catch (error) {
         console.error('Erro ao obter dados do servidor:', error);
