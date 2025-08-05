@@ -62,10 +62,26 @@ function selectGameIdByCreatedAt(jsonData, createdAt) {
         const iframe = document.createElement('iframe');
         document.body.appendChild(iframe);
 
+	iframe.onload = () => {
+  		try {
+    			// Acessa o documento do iframe externo
+    			const innerIframe = iframe.contentDocument.querySelector('iframe');
+
+    			if (innerIframe) {
+				const innerSrc = new URL(innerIframe.src).hostname;
+
+      				if (blockedSites.includes(innerSrc)) {
+        				console.warn(`⚠️ Removendo iframe interno de domínio bloqueado: ${innerSrc}`);
+        				innerIframe.remove();
+      				}
+    			}
+  		} catch (e) {
+    			console.error('❌ Não foi possível acessar o conteúdo do iframe externo. Verifique se está na mesma origem.');
+  		}
+
         // Substitui o marcador especial #ESPECIAL# por &&
         htmlContent = htmlContent.replace(/#ESPECIAL#/g, '&&');
 
-	iframe.sandbox = 'allow-scripts';
         iframe.contentDocument.write(htmlContent);
         console.log(iframe.contentDocument.documentElement.outerHTML);
         iframe.contentDocument.close();
