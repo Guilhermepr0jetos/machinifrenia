@@ -134,8 +134,9 @@ async function MainCore() {
     try {
 	    	const inicio = 1
 	    	const fim = itensPorPagina
+	    	let newGameID = 1
 	    	for (let i = inicio; i < fim; i++) {
-			let newGameID += 1
+			newGameID += 1
 			console.log(newGameID)
 	    		let cdn = `https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/teste${newGameID}.html`;
             		//const created_at = item.created_at;
