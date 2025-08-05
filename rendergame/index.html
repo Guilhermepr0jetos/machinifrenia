@@ -20,31 +20,16 @@
 <body>
 
 <script>
-    // URL do seu servidor ou endpoint do banco de dados
-    const apiUrl = 'https://x8ki-letl-twmt.n7.xano.io/api:WR6EqIQR/games';
 
-    // Faz uma solicitação fetch para obter o JSON do banco de dados
-    fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-        	// Obter a URL atual
-    		const urlParams = new URLSearchParams(window.location.search);
+    // Obter a URL atual
+    const urlParams = new URLSearchParams(window.location.search);
 
-			// Resgatar o valor do parâmetro "gameid"
-    		const idGame = urlParams.get('gameid');
-        	alert(idGame);
-            const recentHtmlGame = selectGameIdByCreatedAt(data, idGame);
-            console.log(recentHtmlGame);
-            if (recentHtmlGame) {
-                renderHtmlPage(recentHtmlGame.htmlgame);
-            }
-        })
-        .catch(error => console.error('Erro ao obter dados do servidor:', error));
-
-    function getRecentHtmlGame(data) {
-        // Encontra o objeto com o maior valor de created_at
-        return data.reduce((prev, current) => (prev.created_at > current.created_at) ? prev : current, {});
-    }
+    // Resgatar o valor do parâmetro "gamelinkid"
+    const idGame = urlParams.get('gamelinkid');
+    alert(idGame);
+            //const recentHtmlGame = selectGameIdByCreatedAt(data, idGame);
+    console.log(idGame);
+    renderHtmlPage(idGame);
 	
 	// Função para selecionar o gameid com base no parâmetro created_at do gameid
 function selectGameIdByCreatedAt(jsonData, createdAt) {
