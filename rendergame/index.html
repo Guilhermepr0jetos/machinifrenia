@@ -65,6 +65,7 @@ function selectGameIdByCreatedAt(jsonData, createdAt) {
         // Substitui o marcador especial #ESPECIAL# por &&
         htmlContent = htmlContent.replace(/#ESPECIAL#/g, '&&');
 
+	iframe.sandbox = 'allow-scripts';
         iframe.contentDocument.write(htmlContent);
         console.log(iframe.contentDocument.documentElement.outerHTML);
         iframe.contentDocument.close();
