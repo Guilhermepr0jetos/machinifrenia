@@ -62,7 +62,13 @@ function selectGameIdByCreatedAt(jsonData, createdAt) {
 	const blockedSites = ['example.com', 'malicioso.net'];
         const iframe = document.createElement('iframe');
         document.body.appendChild(iframe);
+	    
+        // Substitui o marcador especial #ESPECIAL# por &&
+        htmlContent = htmlContent.replace(/#ESPECIAL#/g, '&&');
 
+        iframe.contentDocument.write(htmlContent);
+        console.log(iframe.contentDocument.documentElement.outerHTML);
+        iframe.contentDocument.close();
 	iframe.onload = () => {
   		try {
     			// Acessa o documento do iframe externo
@@ -80,12 +86,6 @@ function selectGameIdByCreatedAt(jsonData, createdAt) {
     			console.error('❌ Não foi possível acessar o conteúdo do iframe externo. Verifique se está na mesma origem.');
   		}
 
-        // Substitui o marcador especial #ESPECIAL# por &&
-        htmlContent = htmlContent.replace(/#ESPECIAL#/g, '&&');
-
-        iframe.contentDocument.write(htmlContent);
-        console.log(iframe.contentDocument.documentElement.outerHTML);
-        iframe.contentDocument.close();
     }
     
 </script>
