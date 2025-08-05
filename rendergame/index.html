@@ -59,6 +59,7 @@ function selectGameIdByCreatedAt(jsonData, createdAt) {
 }
 
     function renderHtmlPage(htmlContent) {
+	const blockedSites = ['example.com', 'malicioso.net'];
         const iframe = document.createElement('iframe');
         document.body.appendChild(iframe);
 
