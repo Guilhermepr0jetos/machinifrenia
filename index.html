@@ -131,7 +131,11 @@ MainCore().then(() => {
 	createGameList(gamesData);
 });
 
-fetch(BDbancoDeDados)
+async function MainCore() {
+    try {
+	    	let newGameID = -1
+
+	    	fetch(BDbancoDeDados)
   .then(res => res.text())
   .then(data => {
     const games = [];
@@ -147,11 +151,7 @@ fetch(BDbancoDeDados)
       });
       games.push(game);
     });
-
-async function MainCore() {
-    try {
-	    	let newGameID = -1
-	    	
+	    
 	    	games.forEach(g => {
 			newGameID += 1
 			console.log(newGameID)
@@ -160,6 +160,7 @@ async function MainCore() {
             		const link = "rendergame/index.html?gamelinkid=" + cdn;
             		gamesData.push({ name: `${g.Name}`, image: `${g.Thumb}`, description: "${g.Description}", link: link });
 		});
+  });
 		
         //const response = await fetch(apiUrl);
         //const data = await response.json();
