@@ -136,7 +136,10 @@ async function MainCore() {
     try {
 	    	let newGameID = -1
 
-await fetch(BDbancoDeDados)
+await fetch(BDbancoDeDados, {
+  method: 'GET',
+  cache: 'no-store'
+})
   .then(res => res.text())
   .then(data => {
     const games = [];
