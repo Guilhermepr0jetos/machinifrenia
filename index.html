@@ -131,7 +131,7 @@ MainCore().then(() => {
 	createGameList(gamesData);
 });
 
-fetch('games.txt')
+fetch(BDbancoDeDados)
   .then(res => res.text())
   .then(data => {
     const games = [];
@@ -159,7 +159,7 @@ async function MainCore() {
             		//const created_at = item.created_at;
             		const link = "rendergame/index.html?gamelinkid=" + cdn;
             		gamesData.push({ name: `${g.Name}`, image: `${g.Thumb}`, description: "${g.Description}", link: link });
-		}
+		});
 		
         //const response = await fetch(apiUrl);
         //const data = await response.json();
