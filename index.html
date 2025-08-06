@@ -158,12 +158,14 @@ await fetch(BDbancoDeDados, {
     });
 	    
 	    	games.forEach(g => {
-			newGameID += 1
-			console.log(newGameID)
-	    		let cdn = `https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/teste${newGameID}.html`;
-            		//const created_at = item.created_at;
-            		const link = "rendergame/index.html?gamelinkid=" + cdn;
-            		gamesData.push({ name: `${g.Name}`, image: `${g.Thumb}`, description: "${g.Description}", link: link });
+			if (g.Name && g.Thumb && g.Description) {
+				newGameID += 1
+				console.log(newGameID)
+	    			let cdn = `https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/teste${newGameID}.html`;
+            			//const created_at = item.created_at;
+            			const link = "rendergame/index.html?gamelinkid=" + cdn;
+            			gamesData.push({ name: `${g.Name}`, image: `${g.Thumb}`, description: `${g.Description}`, link: link });
+			}
 		});
   });
 		
