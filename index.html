@@ -115,6 +115,7 @@ document.getElementById("endereçoPagina").textContent=window.location.href;
 
 // URL do seu servidor ou endpoint do banco de dados
     //const apiUrl = 'https://x8ki-letl-twmt.n7.xano.io/api:WR6EqIQR/games';
+    const BDbancoDeDados = 'https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/BD.html';
 
 let gameid;
 let teste;
@@ -130,18 +131,34 @@ MainCore().then(() => {
 	createGameList(gamesData);
 });
 
+fetch('games.txt')
+  .then(res => res.text())
+  .then(data => {
+    const games = [];
+    const blocks = data.split(/game\d+\s*{([^}]*)}/g).filter(Boolean);
+
+    blocks.forEach(block => {
+      const game = {};
+      block.split('\n').forEach(line => {
+        const [key, value] = line.split('=');
+        if (key && value) {
+          game[key.trim()] = value.replace(/"/g, '').trim();
+        }
+      });
+      games.push(game);
+    });
+
 async function MainCore() {
     try {
-	    	const inicio = 0
-	    	const fim = itensPorPagina
 	    	let newGameID = -1
-	    	for (let i = inicio; i < fim; i++) {
+	    	
+	    	games.forEach(g => {
 			newGameID += 1
 			console.log(newGameID)
 	    		let cdn = `https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/teste${newGameID}.html`;
             		//const created_at = item.created_at;
             		const link = "rendergame/index.html?gamelinkid=" + cdn;
-            		gamesData.push({ name: `Jogo ${newGameID}`, image: `https://i0.wp.com/onaircode.com/wp-content/uploads/2018/02/Online-HTML-Editors.jpg?fit=1280%2C720&ssl=1`, description: "Descrição para testes", link: link });
+            		gamesData.push({ name: `${g.Name}`, image: `${g.Thumb}`, description: "${g.Description}", link: link });
 		}
 		
         //const response = await fetch(apiUrl);
