@@ -143,10 +143,10 @@ await fetch(BDbancoDeDados, {
   .then(res => res.text())
   .then(data => {
     const games = [];
+    const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
 
 blocks.forEach(block => {
     const game = {};
-    const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
     
     // Remove o cabeçalho "gameX{" e a chave de fechamento "}"
     const content = block.replace(/game\d+\s*{/, '').replace(/}$/, '');
