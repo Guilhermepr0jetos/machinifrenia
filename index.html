@@ -135,7 +135,7 @@ async function MainCore() {
     try {
 	    	let newGameID = -1
 
-	    	fetch(BDbancoDeDados)
+fetch(BDbancoDeDados)
   .then(res => res.text())
   .then(data => {
     const games = [];
@@ -150,6 +150,7 @@ async function MainCore() {
         }
       });
       games.push(game);
+      console.log(games)
     });
 	    
 	    	games.forEach(g => {
