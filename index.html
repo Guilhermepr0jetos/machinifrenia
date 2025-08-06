@@ -143,21 +143,25 @@ await fetch(BDbancoDeDados, {
   .then(res => res.text())
   .then(data => {
     const games = [];
-    const blocks = data.split(/game\d+\s*{([^}]*)}/g).filter(Boolean);
 
-    blocks.forEach(block => {
-      const game = {};
-      block.split('\n').forEach(line => {
+blocks.forEach(block => {
+    const game = {};
+    
+    // Remove o cabeçalho "gameX{" e a chave de fechamento "}"
+    const content = block.replace(/game\d+\s*{/, '').replace(/}$/, '');
+    
+    content.split('\n').forEach(line => {
         const [key, value] = line.split('=');
         if (key && value) {
-          game[key.trim()] = value.replace(/"/g, '').trim();
+            game[key.trim()] = value.replace(/"/g, '').trim();
         }
-      });
-	if(game){
-		games.push(game);
-      		console.log(games)
-	}
     });
+    
+    // Verifica se o objeto tem pelo menos os campos esperados
+    if (game.Name && game.Thumb && game.Description) {
+        games.push(game);
+    }
+});
 	    
 	    	games.forEach(g => {
 			if (g.Name && g.Thumb && g.Description) {
