@@ -139,6 +139,7 @@ async function MainCore() {
 await fetch(BDbancoDeDados, {
   method: 'GET',
   cache: 'no-store'
+  redirect: 'manual'
 })
   .then(res => res.text())
   .then(data => {
