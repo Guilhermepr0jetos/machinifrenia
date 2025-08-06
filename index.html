@@ -153,8 +153,10 @@ await fetch(BDbancoDeDados, {
           game[key.trim()] = value.replace(/"/g, '').trim();
         }
       });
-      games.push(game);
-      console.log(games)
+	if(game){
+		games.push(game);
+      		console.log(games)
+	}
     });
 	    
 	    	games.forEach(g => {
