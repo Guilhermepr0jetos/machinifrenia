@@ -130,12 +130,6 @@ let bdID = 0;
     const itensPorPagina = 10; // Número de itens por página
     let paginaAtual = 1; // Página inicial
 
-MainCore().then(() => {
-    // Aqui você tem acesso à variável gamesData definida fora da função assíncrona
-    // Chamar a função para criar a lista de jogos
-	createGameList(gamesData);
-});
-
 async function MainCore() {
 	    	let newGameID = -1
 function tentarFonte() {
@@ -148,7 +142,7 @@ fetch(BDbancoDeDados[bdID], {
 		  bdID++;
 		  throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
 	  }
-	  return res;
+	  return res.text();
 	})
 	.then(data => {
     const games = [];
@@ -208,6 +202,11 @@ blocks.forEach(block => {
         */
 }
 
+MainCore().then(() => {
+    // Aqui você tem acesso à variável gamesData definida fora da função assíncrona
+    // Chamar a função para criar a lista de jogos
+	createGameList(gamesData);
+});
 
 // Agora você pode acessar globalData aqui fora após o fetch ser concluído
 //alert(gameid); // Isso deve funcionar corretamente
