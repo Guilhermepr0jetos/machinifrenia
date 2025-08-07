@@ -184,7 +184,13 @@ blocks.forEach(block => {
 			}
 		});
   });
-	}
+	.catch(error => {
+		console.error('Erro ao obter dados do servidor:', error);
+		bdID++
+		console.log(bdID);
+		tentarFonte();
+	})
+}
 	tentarFonte();
 	
         //const response = await fetch(apiUrl);
@@ -199,13 +205,6 @@ blocks.forEach(block => {
 	    
         });
         */
-        
-    } catch (error) {
-		bdID++
-		console.log(bdID);
-		tentarFonte();
-        console.error('Erro ao obter dados do servidor:', error);
-    }
 }
 
 
