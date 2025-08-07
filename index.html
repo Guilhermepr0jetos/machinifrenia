@@ -138,8 +138,8 @@ MainCore().then(() => {
 
 async function MainCore() {
 	    	let newGameID = -1
-async function tentarFonte() {
-await fetch(BDbancoDeDados[bdID], {
+function tentarFonte() {
+fetch(BDbancoDeDados[bdID], {
   method: 'GET',
   cache: 'no-store'
 })
@@ -148,7 +148,7 @@ await fetch(BDbancoDeDados[bdID], {
 		  bdID++;
 		  throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
 	  }
-	  return res.text();
+	  return res;
 	})
 	.then(data => {
     const games = [];
