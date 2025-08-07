@@ -115,7 +115,7 @@ document.getElementById("endereçoPagina").textContent=window.location.href;
 	//
 
 // URL do seu servidor ou endpoint do banco de dados
-    //const apiUrl = 'https://x8ki-letl-twmt.n7.xano.io/api:WR6EqIQR/games';
+    //const apiUrl = '';
 
 const BDbancoDeDados = ['https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/BD.html',
 					    'https://guilhermepr0jetos.github.io/machinifrenia/cdn/BD.html'
@@ -132,8 +132,8 @@ let bdID = 0;
 
 async function MainCore() {
 	    	let newGameID = -1
-function tentarFonte() {
-fetch(BDbancoDeDados[bdID], {
+async function tentarFonte() {
+await fetch(BDbancoDeDados[bdID], {
   method: 'GET',
   cache: 'no-store'
 })
@@ -175,6 +175,7 @@ blocks.forEach(block => {
             			//const created_at = item.created_at;
             			const link = "rendergame/index.html?gamelinkid=" + cdn;
             			gamesData.push({ name: `${g.Name}`, image: `${g.Thumb}`, description: `${g.Description}`, link: link });
+						createGameList(gamesData);
 						console.log(gamesData);
 			}
 		});
@@ -205,7 +206,7 @@ blocks.forEach(block => {
 MainCore().then(() => {
     // Aqui você tem acesso à variável gamesData definida fora da função assíncrona
     // Chamar a função para criar a lista de jogos
-	createGameList(gamesData);
+	
 });
 
 // Agora você pode acessar globalData aqui fora após o fetch ser concluído
