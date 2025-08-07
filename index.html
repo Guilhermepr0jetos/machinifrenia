@@ -137,18 +137,16 @@ MainCore().then(() => {
 });
 
 async function MainCore() {
-    try {
 	    	let newGameID = -1
-for (let i = 0; i < BDbancoDeDados.length; i++) {
+	function tentarFonte() {
 await fetch(BDbancoDeDados[bdID], {
   method: 'GET',
   cache: 'no-store'
 })
   .then(res => {
 	  if(!res.ok){
-			bdID += i;
-		  	throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
-		  }
+		  bdID ++ i;
+		  throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
 	  }
 	  return res.text();
 	})
@@ -186,9 +184,8 @@ blocks.forEach(block => {
 			}
 		});
   });
-  } catch (error) {
-        console.error('Erro ao obter dados do servidor:', error);
-    }
+	}
+	tentarFonte();
 	
         //const response = await fetch(apiUrl);
         //const data = await response.json();
@@ -204,6 +201,9 @@ blocks.forEach(block => {
         */
         
     } catch (error) {
+		bdID++
+		console.log(bdID);
+		tentarFonte();
         console.error('Erro ao obter dados do servidor:', error);
     }
 }
