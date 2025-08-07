@@ -146,11 +146,9 @@ await fetch(BDbancoDeDados[bdID], {
 })
   .then(res => {
 	  if(!res.ok){
-			bdID ++;
+			bdID += i;
 		  
 		  }
-	  })
-	  return res.text();
 	  .then(data => {
     const games = [];
     const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
@@ -185,6 +183,8 @@ blocks.forEach(block => {
 			}
 		});
   });
+	  })
+	  return res.text();
   }
 		
         //const response = await fetch(apiUrl);
