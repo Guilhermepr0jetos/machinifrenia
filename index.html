@@ -147,15 +147,12 @@ await fetch(BDbancoDeDados[bdID], {
   .then(res => {
 	  if(!res.ok){
 			bdID += i;
-		  
+		  	throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
 		  }
-	  })
+	  }
 	  return res.text();
-	}
-  } catch (error) {
-        console.error('Erro ao obter dados do servidor:', error);
-    }
-	.then(data => {
+	})
+		.then(data => {
     const games = [];
     const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
 
@@ -188,7 +185,11 @@ blocks.forEach(block => {
             			gamesData.push({ name: `${g.Name}`, image: `${g.Thumb}`, description: `${g.Description}`, link: link });
 			}
 		});
-  });	
+  });
+  } catch (error) {
+        console.error('Erro ao obter dados do servidor:', error);
+    }
+	
         //const response = await fetch(apiUrl);
         //const data = await response.json();
         //console.log("Dados obtidos do servidor:", data);
