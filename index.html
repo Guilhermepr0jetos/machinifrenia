@@ -149,7 +149,11 @@ await fetch(BDbancoDeDados[bdID], {
 			bdID += i;
 		  
 		  }
-	  .then(data => {
+	  })
+	  return res.text();
+	})
+  }
+	.then(data => {
     const games = [];
     const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
 
@@ -182,11 +186,7 @@ blocks.forEach(block => {
             			gamesData.push({ name: `${g.Name}`, image: `${g.Thumb}`, description: `${g.Description}`, link: link });
 			}
 		});
-  });
-	  })
-	  return res.text();
-  }
-		
+  });	
         //const response = await fetch(apiUrl);
         //const data = await response.json();
         //console.log("Dados obtidos do servidor:", data);
@@ -204,6 +204,7 @@ blocks.forEach(block => {
         console.error('Erro ao obter dados do servidor:', error);
     }
 }
+
 
 // Agora você pode acessar globalData aqui fora após o fetch ser concluído
 //alert(gameid); // Isso deve funcionar corretamente
