@@ -140,6 +140,7 @@ fetch(BDbancoDeDados[bdID], {
   .then(res => {
 	  if(!res.ok){
 		  bdID++;
+		  tentarFonte();
 		  throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
 	  }
 	  return res.text();
