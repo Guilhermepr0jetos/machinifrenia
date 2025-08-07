@@ -150,7 +150,7 @@ fetch(BDbancoDeDados[bdID], {
 	  }
 	  return res.text();
 	})
-		.then(data => {
+	.then(data => {
     const games = [];
     const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
 
@@ -183,13 +183,13 @@ blocks.forEach(block => {
             			gamesData.push({ name: `${g.Name}`, image: `${g.Thumb}`, description: `${g.Description}`, link: link });
 			}
 		});
-  });
+  })
 	.catch(error => {
 		console.error('Erro ao obter dados do servidor:', error);
 		bdID++
 		console.log(bdID);
 		tentarFonte();
-	})
+	});
 }
 	tentarFonte();
 	
