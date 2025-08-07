@@ -139,7 +139,7 @@ MainCore().then(() => {
 async function MainCore() {
 	    	let newGameID = -1
 	function tentarFonte() {
-await fetch(BDbancoDeDados[bdID], {
+fetch(BDbancoDeDados[bdID], {
   method: 'GET',
   cache: 'no-store'
 })
