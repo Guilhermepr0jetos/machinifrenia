@@ -152,7 +152,9 @@ await fetch(BDbancoDeDados[bdID], {
 	  })
 	  return res.text();
 	}
-  }
+  } catch (error) {
+        console.error('Erro ao obter dados do servidor:', error);
+    }
 	.then(data => {
     const games = [];
     const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
