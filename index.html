@@ -140,7 +140,11 @@ await fetch(BDbancoDeDados[bdID], {
   .then(res => {
 	  if(!res.ok){
 		  bdID++;
-		  throw new Error(`Fonte ${bdID} respondeu com status ${res.status}`);
+		  if (bdID >= BDbancoDeDados.length) {
+  				console.error('Todas as fontes falharam.');
+  				return;
+		  }
+		  throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
 	  }
 	  return res.text();
 	})
@@ -175,16 +179,16 @@ blocks.forEach(block => {
             			//const created_at = item.created_at;
             			const link = "rendergame/index.html?gamelinkid=" + cdn;
             			gamesData.push({ name: `${g.Name}`, image: `${g.Thumb}`, description: `${g.Description}`, link: link });
-						createGameList(gamesData);
 						console.log(gamesData);
 			}
 		});
+		createGameList(gamesData);
   })
 	.catch(error => {
 		console.error('Erro ao obter dados do servidor:', error);
 		bdID++
 		console.log(bdID);
-		tentarFonte();
+		await tentarFonte();
 	});
 }
 	tentarFonte();
