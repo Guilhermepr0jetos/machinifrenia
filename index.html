@@ -132,8 +132,8 @@ let bdID = 0;
 
 async function MainCore() {
 	    	let newGameID = -1
-async function tentarFonte() {
-await fetch(BDbancoDeDados[bdID], {
+function tentarFonte() {
+fetch(BDbancoDeDados[bdID], {
   method: 'GET',
   cache: 'no-store'
 })
@@ -188,7 +188,7 @@ blocks.forEach(block => {
 		console.error('Erro ao obter dados do servidor:', error);
 		bdID++
 		console.log(bdID);
-		await tentarFonte();
+		tentarFonte();
 	});
 }
 	tentarFonte();
