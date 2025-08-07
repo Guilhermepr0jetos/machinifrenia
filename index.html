@@ -118,12 +118,13 @@ document.getElementById("endereçoPagina").textContent=window.location.href;
     //const apiUrl = 'https://x8ki-letl-twmt.n7.xano.io/api:WR6EqIQR/games';
 
 const BDbancoDeDados = ['https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/BD.html',
-					    ''
+					    'https://guilhermepr0jetos.github.io/machinifrenia/cdn/BD.html'
 					   ];
 
 let gameid;
 let teste;
 let gamesData = [];
+let bdID;
 
 // Variáveis para controle da paginação
     const itensPorPagina = 10; // Número de itens por página
@@ -138,12 +139,19 @@ MainCore().then(() => {
 async function MainCore() {
     try {
 	    	let newGameID = -1
-
-await fetch(BDbancoDeDados, {
+for (let i = 0; i < BDbancoDeDados.length; i++) {
+await fetch(BDbancoDeDados[bdID], {
   method: 'GET',
   cache: 'no-store'
 })
-  .then(res => res.text())
+  .then(res => {
+	  if(!res.ok){
+			bdID ++;
+		  
+		  }
+	  }
+	  return res.text();
+  })
   .then(data => {
     const games = [];
     const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
