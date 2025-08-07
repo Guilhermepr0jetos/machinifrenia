@@ -140,10 +140,6 @@ fetch(BDbancoDeDados[bdID], {
   .then(res => {
 	  if(!res.ok){
 		  bdID++;
-		  if (bdID >= BDbancoDeDados.length) {
-  				console.error('Todas as fontes falharam.');
-  				return;
-		  }
 		  throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
 	  }
 	  return res.text();
@@ -186,9 +182,10 @@ blocks.forEach(block => {
   })
 	.catch(error => {
 		console.error('Erro ao obter dados do servidor:', error);
-		bdID++
-		console.log(bdID);
-		tentarFonte();
+		if (bdID >= BDbancoDeDados.length) {
+  				console.error('Todas as fontes falharam.');
+  				return;
+		}
 	});
 }
 	tentarFonte();
