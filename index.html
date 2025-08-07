@@ -149,9 +149,9 @@ await fetch(BDbancoDeDados[bdID], {
 			bdID ++;
 		  
 		  }
-	  }
+	  })
 	  return res.text();
-  })
+  }
   .then(data => {
     const games = [];
     const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
