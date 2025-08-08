@@ -225,8 +225,6 @@ fetch(isCacheDB[bdID], {
 })
   .then(res => {
 	  if(!res.ok){
-		  bdID++;
-		  tentarFonte();
 		  throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
 	  }
 	  return res.text();
@@ -270,7 +268,7 @@ blocks.forEach(block => {
 		}
 	});
 }
-
+tentarFonteCache()
 	
 	
         //const response = await fetch(apiUrl);
