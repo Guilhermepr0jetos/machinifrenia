@@ -134,15 +134,17 @@ const BDbancoDeDados = [
 					    'https://guilhermepr0jetos.github.io/machinifrenia/cdn/BD.html'
 					   ];
 
+const isCacheDB [
+				//no cache CDN
+				'https://machinifrenia.vercel.app/cdn/isCache.html'
+				//no cache CDN
+				]
+	
 let gameid;
 let teste;
 let gamesData = [];
 let bdID = 0;
 let cache = false;
-
-if(cache == true){
-	document.getElementById('cacheON').innerText= "ATENÇÃO!, provavelmente nosso Banco de dados principal caiu, você está usando um reserva."
-}
 
 // Variáveis para controle da paginação
     const itensPorPagina = 10; // Número de itens por página
@@ -208,6 +210,68 @@ blocks.forEach(block => {
 	});
 }
 	tentarFonte();
+
+
+
+
+
+
+
+
+function tentarFonteCache() {
+fetch(isCacheDB[bdID], {
+  method: 'GET',
+  cache: 'no-store'
+})
+  .then(res => {
+	  if(!res.ok){
+		  bdID++;
+		  tentarFonte();
+		  throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
+	  }
+	  return res.text();
+	})
+	.then(data => {
+    const ToBeAddedCacheInfo = [];
+    const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
+
+blocks.forEach(block => {
+    const cache = {};
+    
+    // Remove o cabeçalho "gameX{" e a chave de fechamento "}"
+    const content = block.replace(/isCache\d+\s*{/, '').replace(/}$/, '');
+    
+    content.split('\n').forEach(line => {
+        const [key, value] = line.split('=');
+        if (key && value) {
+            cache[key.trim()] = value.replace(/"/g, '').trim();
+        }
+    });
+    
+    // Verifica se o objeto tem pelo menos os campos esperados
+    if (cache.Cache) {
+        ToBeAddedCacheInfo.push(cache);
+    }
+});
+	    
+	    	ToBeAddedCacheInfo.forEach(c => {
+			if (c.Cache) {
+				if(c.Cache == true){
+					document.getElementById('cacheON').innerText= "ATENÇÃO!, provavelmente nosso Banco de dados principal caiu, você está usando um reserva."
+				}
+			}
+		});
+  })
+	.catch(error => {
+		console.error('Erro ao obter dados do servidor:', error);
+		if (bdID >= BDbancoDeDados.length) {
+  				console.error('Todas as fontes falharam.');
+  				return;
+		}
+	});
+}
+
+	
 	
         //const response = await fetch(apiUrl);
         //const data = await response.json();
