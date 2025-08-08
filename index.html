@@ -244,7 +244,6 @@ blocks.forEach(block => {
             cacheTemporary[key.trim()] = value.replace(/"/g, '').trim();
         }
     });
-	console.log(cacheTemporary)
     
     // Verifica se o objeto tem pelo menos os campos esperados
     if (cacheTemporary.Cache) {
@@ -254,7 +253,6 @@ blocks.forEach(block => {
 	    
 	    	ToBeAddedCacheInfo.forEach(c => {
 			if (c.Cache) {
-				console.log(c.Cache)
 				if(c.Cache == "true"){
 					document.getElementById('cacheON').innerText= "ATENÇÃO!, provavelmente nosso Banco de dados principal caiu, você está usando um reserva."
 				}
