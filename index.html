@@ -236,7 +236,7 @@ fetch(isCacheDB[bdID], {
     const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
 
 blocks.forEach(block => {
-    const cache = {};
+    const cacheTemporary = {};
     
     // Remove o cabeçalho "gameX{" e a chave de fechamento "}"
     const content = block.replace(/isCache\d+\s*{/, '').replace(/}$/, '');
@@ -244,13 +244,13 @@ blocks.forEach(block => {
     content.split('\n').forEach(line => {
         const [key, value] = line.split('=');
         if (key && value) {
-            cache[key.trim()] = value.replace(/"/g, '').trim();
+            cacheTemporary[key.trim()] = value.replace(/"/g, '').trim();
         }
     });
     
     // Verifica se o objeto tem pelo menos os campos esperados
-    if (cache.Cache) {
-        ToBeAddedCacheInfo.push(cache);
+    if (cacheTemporary.Cache) {
+        ToBeAddedCacheInfo.push(cacheTemporary);
     }
 });
 	    
