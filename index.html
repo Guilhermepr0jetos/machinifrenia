@@ -227,12 +227,11 @@ fetch(isCacheDB[bdID], {
 	  if(!res.ok){
 		  throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
 	  }
-	  console.log(res.text);
 	  return res.text();
 	})
 	.then(data => {
     const ToBeAddedCacheInfo = [];
-    const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
+    const blocks = data.match(/isCache\d+\s*{[^}]*}/g) || [];
 
 blocks.forEach(block => {
     const cacheTemporary = {};
