@@ -236,7 +236,7 @@ fetch(isCacheDB[bdID], {
 blocks.forEach(block => {
     const cacheTemporary = {};
     
-    // Remove o cabeçalho "gameX{" e a chave de fechamento "}"
+    // Remove o cabeçalho "isCacheX{" e a chave de fechamento "}"
     const content = block.replace(/isCache\d+\s*{/, '').replace(/}$/, '');
     
     content.split('\n').forEach(line => {
@@ -245,6 +245,7 @@ blocks.forEach(block => {
             cacheTemporary[key.trim()] = value.replace(/"/g, '').trim();
         }
     });
+	console.log(cacheTemporary)
     
     // Verifica se o objeto tem pelo menos os campos esperados
     if (cacheTemporary.Cache) {
