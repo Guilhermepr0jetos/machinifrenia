@@ -21,8 +21,8 @@
 	<div id="endereçoPagina" class="elementosUserInfo">
 		
 	</div>
-  	<div>
-		ATENÇÃO, PARA ATUALIZAR A LISTA DE ESPAÇOS WEB, É NECESSARIO LIMPAR O CACHE DO SEU NAVEGADOR!
+  	<div id='cacheON'>
+		
 	</div>
 </div>
 
@@ -124,7 +124,12 @@ document.getElementById("endereçoPagina").textContent=window.location.href;
 // URL do seu servidor ou endpoint do banco de dados
     //const apiUrl = '';
 
-const BDbancoDeDados = ['https://machinifrenia.vercel.app/cdn/BD.html',
+const BDbancoDeDados = [
+						//no cache CDN
+						'https://machinifrenia.vercel.app/cdn/BD.html',
+						//no cache CDN
+
+						//cache CDN
 						'https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/BD.html',
 					    'https://guilhermepr0jetos.github.io/machinifrenia/cdn/BD.html'
 					   ];
@@ -133,6 +138,11 @@ let gameid;
 let teste;
 let gamesData = [];
 let bdID = 0;
+let cache = true;
+
+if(cache == true){
+	document.getElemnetById('cacheON').innerText("ATENÇÃO!, provavelmente nosso Banco de dados principal caiu, você está usando um reserva.")
+}
 
 // Variáveis para controle da paginação
     const itensPorPagina = 10; // Número de itens por página
