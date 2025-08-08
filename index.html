@@ -227,6 +227,7 @@ fetch(isCacheDB[bdID], {
 	  if(!res.ok){
 		  throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
 	  }
+	  console.log(res.text);
 	  return res.text();
 	})
 	.then(data => {
