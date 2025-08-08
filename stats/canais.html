@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
-      <div style="width: 100%; height: 50px; background-color: lightblue; display: flex";>
+      <div id="flexDIV" style="width: 100%; height: 50px; background-color: lightblue; display: flex";>
         <a href="https://machinifrenia.vercel.app/" target="_blank">
           <button>HOME</button>
         </a>
@@ -28,6 +28,11 @@
       </div>
       
       <script>
+        if(window.location.href.includes("https://guilhermepr0jetos.github.io/machinifrenia")){
+		      let flexDIV = document.getElementById("flexDIV");
+		      userDIV.querySelector('a').href = "https://guilhermepr0jetos.github.io/machinifrenia";
+	      }
+        
         new Chart(document.getElementById("GSassinantes"), {
           type: 'line',
           data: {
