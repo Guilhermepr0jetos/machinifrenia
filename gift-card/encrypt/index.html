@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><title>Criar Gift Card Seguro</title>
+<style>body{font-family:sans-serif;padding:2rem;max-width:760px;margin:auto}</style>
+</head>
+<body>
+<h2>🎁 Criar Gift Card Seguro</h2>
+
+<label>Código do gift card (recomendado gerar aleatório):</label>
+<input id="code" placeholder="ex: 32+ chars aleatórios" />
+
+<label>Valor</label>
+<input id="value" type="number" min="1" value="50" />
+
+<label>Moeda</label>
+<input id="currency" value="BRL" />
+
+<label>Validade (opcional)</label>
+<input id="expires" type="datetime-local" />
+
+<label>Arquivo de referência (gera a chave):</label>
+<input id="refFile" type="file" />
+
+<label>Anexo (opcional, será entregue após descriptografia):</label>
+<input id="attach" type="file" />
+
+<button id="gen">Gerar giftcard.bin</button>
+<pre id="out"></pre>
+
+<script>
+const API_BASE = ""; // opcional: URL do seu backend p/ registrar
+
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+
+function uuidv4(){
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+}
+
+async function fileToBase64(file){
+  const buf = await file.arrayBuffer();
+  const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+  return `data:${file.type};base64,${b64}`;
+}
+
+async function sha256Hex(str){
+  const hash = await crypto.subtle.digest("SHA-256", enc.encode(str));
+  return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+document.getElementById("gen").onclick = async () => {
+  const code = document.getElementById("code").value.trim();
+  const value = parseFloat(document.getElementById("value").value);
+  const currency = document.getElementById("currency").value.trim() || "BRL";
+  const expiresEl = document.getElementById("expires").value;
+  const refFile = document.getElementById("refFile").files[0];
+  const attach = document.getElementById("attach").files[0];
+  const out = document.getElementById("out");
+
+  if (!code || !refFile || !value) { out.textContent = "Preencha código, valor e arquivo de referência."; return; }
+
+  const giftId = uuidv4();
+
+  // Monta payload
+  const payload = {
+    giftId,
+    code, // será protegido pela criptografia
+    meta: {
+      value, currency,
+      expiresAt: expiresEl ? new Date(expiresEl).toISOString() : null
+    },
+    attachment: null
+  };
+  if (attach) {
+    payload.attachment = {
+      name: attach.name,
+      type: attach.type || "application/octet-stream",
+      base64: await fileToBase64(attach)
+    };
+  }
+
+  // Deriva chave do arquivo de referência
+  const refBuf = await refFile.arrayBuffer();
+  const keyMat = await crypto.subtle.digest("SHA-256", refBuf);
+  const key = await crypto.subtle.importKey("raw", keyMat, {name:"AES-GCM"}, false, ["encrypt"]);
+
+  // Criptografa
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const plaintext = enc.encode(JSON.stringify(payload));
+  const ciphertext = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, plaintext);
+
+  // Salva IV + CIPHERTEXT
+  const final = new Uint8Array(iv.byteLength + ciphertext.byteLength);
+  final.set(iv, 0);
+  final.set(new Uint8Array(ciphertext), iv.byteLength);
+
+  const blob = new Blob([final], {type:"application/octet-stream"});
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement("a"), {href:url, download:`giftcard_${giftId}.bin`});
+  a.click(); URL.revokeObjectURL(url);
+
+  // (Opcional) registra no backend: giftId + hash do código
+  const codeHash = await sha256Hex(code);
+  if (API_BASE) {
+    try {
+      await fetch(`${API_BASE}/api/redeem/register`, {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ giftId, codeHash, value, currency, expiresAt: payload.meta.expiresAt })
+      });
+    } catch(e){}
+  }
+
+  out.textContent = `✅ Gift Card criado. giftId=${giftId}\nSugestão: armazene no DB: giftId + codeHash prefix (ou inteiro).`;
+};
+</script>
+</body>
+</html>
