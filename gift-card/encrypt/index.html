@@ -2,7 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><title>Criar Gift Card Seguro</title>
-<style>body{font-family:sans-serif;padding:2rem;max-width:760px;margin:auto}</style>
+<style>
+  body{font-family:sans-serif;padding:2rem;max-width:760px;margin:auto}
+  label{display:block;margin-top:1rem}
+  input,textarea,button{margin-top:.25rem}
+</style>
 </head>
 <body>
 <h2>🎁 Criar Gift Card Seguro</h2>
@@ -16,7 +20,7 @@
 <label>Moeda</label>
 <input id="currency" value="BRL" />
 
-<label>Validade (opcional)</label>
+<label>Validade (se vazio, usa +180 dias)</label>
 <input id="expires" type="datetime-local" />
 
 <label>Arquivo de referência (gera a chave):</label>
@@ -29,7 +33,7 @@
 <pre id="out"></pre>
 
 <script>
-const API_BASE = ""; // opcional: URL do seu backend p/ registrar
+const API_BASE = ""; // opcional: URL do seu backend p/ registrar (se usar registro)
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
@@ -41,12 +45,21 @@ function uuidv4(){
 async function fileToBase64(file){
   const buf = await file.arrayBuffer();
   const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-  return `data:${file.type};base64,${b64}`;
+  return `data:${file.type || "application/octet-stream"};base64,${b64}`;
 }
 
 async function sha256Hex(str){
   const hash = await crypto.subtle.digest("SHA-256", enc.encode(str));
   return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+function computeExpiresMs(expiresInputValue){
+  if (expiresInputValue) {
+    const t = new Date(expiresInputValue).getTime();
+    if (Number.isFinite(t) && t > 0) return t;
+  }
+  // padrão: +180 dias a partir de agora
+  return Date.now() + 180 * 24 * 60 * 60 * 1000;
 }
 
 document.getElementById("gen").onclick = async () => {
@@ -58,17 +71,24 @@ document.getElementById("gen").onclick = async () => {
   const attach = document.getElementById("attach").files[0];
   const out = document.getElementById("out");
 
-  if (!code || !refFile || !value) { out.textContent = "Preencha código, valor e arquivo de referência."; return; }
+  out.textContent = "";
+
+  if (!code || !refFile || !value) {
+    out.textContent = "Preencha código, valor e arquivo de referência.";
+    return;
+  }
 
   const giftId = uuidv4();
+  const expiresMs = computeExpiresMs(expiresEl);
+  const expiresIso = new Date(expiresMs).toISOString();
 
-  // Monta payload
+  // Monta payload (o payload também guarda a validade, mas a autoridade de expiração está no cabeçalho)
   const payload = {
     giftId,
-    code, // será protegido pela criptografia
+    code, // protegido pela criptografia
     meta: {
       value, currency,
-      expiresAt: expiresEl ? new Date(expiresEl).toISOString() : null
+      expiresAt: expiresIso
     },
     attachment: null
   };
@@ -85,34 +105,50 @@ document.getElementById("gen").onclick = async () => {
   const keyMat = await crypto.subtle.digest("SHA-256", refBuf);
   const key = await crypto.subtle.importKey("raw", keyMat, {name:"AES-GCM"}, false, ["encrypt"]);
 
-  // Criptografa
+  // Cabeçalho: "GFC1" + expiresMs(uint64 big-endian)
+  const header = new Uint8Array(12);
+  header.set(new TextEncoder().encode("GFC1"), 0);
+  const dv = new DataView(header.buffer);
+  const hi = Math.floor(expiresMs / 2**32);
+  const lo = Math.floor(expiresMs % 2**32);
+  dv.setUint32(4, hi, false); // big-endian
+  dv.setUint32(8, lo, false); // big-endian
+
+  // Criptografa com IV aleatório e AAD = header
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const plaintext = enc.encode(JSON.stringify(payload));
-  const ciphertext = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, plaintext);
+  const ciphertext = await crypto.subtle.encrypt({name:"AES-GCM", iv, additionalData: header}, key, plaintext);
 
-  // Salva IV + CIPHERTEXT
-  const final = new Uint8Array(iv.byteLength + ciphertext.byteLength);
-  final.set(iv, 0);
-  final.set(new Uint8Array(ciphertext), iv.byteLength);
+  // final = header (12) + iv (12) + ciphertext
+  const final = new Uint8Array(12 + 12 + ciphertext.byteLength);
+  final.set(header, 0);
+  final.set(iv, 12);
+  final.set(new Uint8Array(ciphertext), 24);
 
+  // Gera arquivo
   const blob = new Blob([final], {type:"application/octet-stream"});
   const url = URL.createObjectURL(blob);
   const a = Object.assign(document.createElement("a"), {href:url, download:`giftcard_${giftId}.bin`});
   a.click(); URL.revokeObjectURL(url);
 
-  // (Opcional) registra no backend: giftId + hash do código
-  const codeHash = await sha256Hex(code);
-  if (API_BASE) {
-    try {
-      await fetch(`${API_BASE}/api/redeem/register`, {
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ giftId, codeHash, value, currency, expiresAt: payload.meta.expiresAt })
-      });
-    } catch(e){}
-  }
+  // (Opcional) registro no backend — seu banco só para ATIVADOS? então mantenha desabilitado.
+  // Caso queira registrar metadados não sensíveis:
+  // const codeHash = await sha256Hex(code);
+  // if (API_BASE) {
+  //   try {
+  //     await fetch(`${API_BASE}/api/redeem/register`, {
+  //       method:"POST", headers:{"Content-Type":"application/json"},
+  //       body: JSON.stringify({ giftId, codeHash, value, currency, expiresAt: expiresIso })
+  //     });
+  //   } catch(e){}
+  // }
 
-  out.textContent = `✅ Gift Card criado. giftId=${giftId}\nSugestão: armazene no DB: giftId + codeHash prefix (ou inteiro).`;
+  out.textContent = `✅ Gift Card criado.
+giftId=${giftId}
+expira em: ${new Date(expiresMs).toLocaleString()}
+Formato: [GFC1|uint64_be(expiresMs)|IV|ciphertext+tag]`;
 };
 </script>
 </body>
 </html>
+```
