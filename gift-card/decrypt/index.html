@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><title>Ativar Gift Card</title>
-<style>body{font-family:sans-serif;padding:2rem;max-width:760px;margin:auto}</style>
+<style>body{font-family:sans-serif;padding:2rem;max-width:760px;margin:auto} label{display:block;margin-top:1rem}</style>
 </head>
 <body>
 <h2>🔓 Ativar Gift Card</h2>
@@ -19,12 +19,34 @@
 <div id="server" style="margin-top:1rem"></div>
 
 <script>
+/*
+Layout do .bin:
+[0..3]   = "GFC1" (ASCII)
+[4..11]  = expiresAtMs (Uint64 big-endian)
+[12..23] = IV (12 bytes)
+[24..]   = ciphertext+tag (AES-GCM)
+O cabeçalho [0..11] é usado como AAD no AES-GCM.
+*/
+
 const API_BASE = ""; // defina sua API do jogo (Vercel, etc.)
 const enc = new TextEncoder(), dec = new TextDecoder();
+
+function toHex(u8) {
+  return [...u8].map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
 async function sha256Hex(str){
   const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
   return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+function readUint64BE(view, offset = 0) {
+  if (typeof view.getBigUint64 === 'function') {
+    return Number(view.getBigUint64(offset, false));
+  }
+  const hi = view.getUint32(offset, false);
+  const lo = view.getUint32(offset + 4, false);
+  return hi * 2**32 + lo;
 }
 
 document.getElementById("dec").onclick = async () => {
@@ -38,23 +60,51 @@ document.getElementById("dec").onclick = async () => {
 
   // Lê .bin
   const buf = await binFile.arrayBuffer();
-  const iv = new Uint8Array(buf.slice(0,12));
-  const ciphertext = buf.slice(12);
+  const u8 = new Uint8Array(buf);
+
+  // Valida magic
+  const magic = new TextDecoder().decode(u8.slice(0,4));
+  if (magic !== "GFC1") {
+    info.textContent = "Formato inválido do .bin (magic ausente).";
+    return;
+  }
+
+  // Lê validade (uint64 big-endian, ms desde epoch)
+  const dv = new DataView(buf, 4, 8);
+  const expiresMs = readUint64BE(dv, 0);
+  const expiresAt = new Date(expiresMs);
+
+  // Checagem de validade ANTES de tentar descriptografar
+  const now = Date.now();
+  if (!Number.isFinite(expiresMs) || expiresMs <= 0) {
+    info.textContent = "Cabeçalho sem validade válida.";
+    return;
+  }
+  if (now > expiresMs) {
+    info.innerHTML = `<strong>Status:</strong> expirado em ${expiresAt.toLocaleString()} — operação abortada.`;
+    return;
+  }
+
+  // Lê IV e ciphertext
+  const iv = u8.slice(12, 24);
+  const ciphertext = buf.slice(24);
 
   // Deriva chave do arquivo de referência
   const refBuf = await refFile.arrayBuffer();
   const keyMat = await crypto.subtle.digest("SHA-256", refBuf);
   const key = await crypto.subtle.importKey("raw", keyMat, {name:"AES-GCM"}, false, ["decrypt"]);
 
-  // Descriptografa
+  // Descriptografa com AAD = cabeçalho (magic + expiresAt)
   try {
-    const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, ciphertext);
+    const aad = u8.slice(0, 12); // bytes [0..11]
+    const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv, additionalData: aad}, key, ciphertext);
     const data = JSON.parse(new TextDecoder().decode(plain));
 
-    // Mostra metadados e permite baixar anexo, se houver
+    // Mostra metadados
     let html = `<strong>giftId:</strong> ${data.giftId}<br>
-                <strong>valor:</strong> ${data.meta.value} ${data.meta.currency}<br>
-                <strong>validade:</strong> ${data.meta.expiresAt || "—"}<br>`;
+                <strong>valor:</strong> ${data.meta?.value ?? "—"} ${data.meta?.currency ?? ""}<br>
+                <strong>validade (header):</strong> ${expiresAt.toLocaleString()}<br>
+                <strong>validade (payload):</strong> ${data.meta?.expiresAt || "—"}<br>`;
     if (data.attachment?.base64) {
       const a = document.createElement("a");
       a.href = data.attachment.base64; a.download = data.attachment.name || "anexo";
@@ -68,8 +118,8 @@ document.getElementById("dec").onclick = async () => {
     // Checagem no servidor do jogo (opcional, mas recomendado)
     if (API_BASE) {
       const codeHash = await sha256Hex(data.code);
-      // 1) Verificar se pode ativar
-      const checkRes = await fetch(`${API_BASE}/api/redeem/check?giftId=${encodeURIComponent(data.giftId)}&codeHash=${codeHash}`);
+      // 1) Verificar se pode ativar (o backend também deve validar a validade do cabeçalho)
+      const checkRes = await fetch(`${API_BASE}/api/redeem/check?giftId=${encodeURIComponent(data.giftId)}&codeHash=${codeHash}`, { headers: { "X-Expires-At": String(expiresMs) }});
       const check = await checkRes.json();
       server.innerHTML = `<pre>Check: ${JSON.stringify(check, null, 2)}</pre>`;
 
@@ -79,8 +129,9 @@ document.getElementById("dec").onclick = async () => {
         btn.textContent = "Ativar agora";
         btn.onclick = async () => {
           const actRes = await fetch(`${API_BASE}/api/redeem/activate`, {
-            method:"POST", headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({ giftId: data.giftId, codeHash })
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({ giftId: data.giftId, codeHash, expiresAt: expiresMs })
           });
           const act = await actRes.json();
           server.innerHTML = `<pre>Ativado: ${JSON.stringify(act, null, 2)}</pre>`;
@@ -89,7 +140,8 @@ document.getElementById("dec").onclick = async () => {
       }
     }
   } catch(e) {
-    info.textContent = "Falha ao descriptografar. Confirme o arquivo de referência.";
+    // Se alguém adulterar a validade no cabeçalho, a autenticação GCM falha aqui
+    info.textContent = "Falha ao descriptografar ou cabeçalho adulterado. Confirme o arquivo de referência e a integridade do .bin.";
   }
 };
 </script>
