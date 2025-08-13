@@ -4,6 +4,9 @@
 <meta charset="UTF-8"><title>Abrir Gift Card Seguro</title>
 <style>
   body{font-family:sans-serif;padding:2rem;max-width:760px;margin:auto}
+  label{display:block;margin-top:1rem}
+  button{margin-top:1rem}
+  .muted{color:#555}
 </style>
 </head>
 <body>
@@ -22,6 +25,33 @@
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
+async function getUtcNowMs(){
+  // Fonte primária: worldtimeapi.org (UTC)
+  const r = await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC", { cache: "no-store" });
+  if (!r.ok) throw new Error("Falha ao consultar servidor de tempo (HTTP " + r.status + ")");
+  const j = await r.json();
+  if (typeof j.unixtime === "number") return j.unixtime * 1000;
+  if (j.utc_datetime) {
+    const t = Date.parse(j.utc_datetime);
+    if (Number.isFinite(t)) return t;
+  }
+  throw new Error("Resposta do servidor de tempo inválida.");
+}
+
+function readHeader(u8){
+  if (u8.byteLength < 24) throw new Error("Arquivo muito curto.");
+  const header = u8.slice(0, 12);
+  const magic = new TextDecoder().decode(header.slice(0, 4));
+  if (magic !== "GFC1") throw new Error("Formato inválido (magic).");
+  const dv = new DataView(header.buffer);
+  const hi = dv.getUint32(4, false);
+  const lo = dv.getUint32(8, false);
+  const expiresMs = hi * 2**32 + lo;
+  const iv = u8.slice(12, 24);
+  const ciphertext = u8.slice(24);
+  return { header, expiresMs, iv, ciphertext };
+}
+
 document.getElementById("open").onclick = async () => {
   const gcfile = document.getElementById("gcfile").files[0];
   const refFile = document.getElementById("refFile").files[0];
@@ -33,35 +63,56 @@ document.getElementById("open").onclick = async () => {
     return;
   }
 
-  const buf = new Uint8Array(await gcfile.arrayBuffer());
-  const header = buf.slice(0, 12);
-  const magic = dec.decode(header.slice(0, 4));
-  if (magic !== "GFC1") { out.textContent = "Formato inválido."; return; }
-
-  const dv = new DataView(header.buffer);
-  const hi = dv.getUint32(4, false);
-  const lo = dv.getUint32(8, false);
-  const expiresMs = hi * 2**32 + lo;
-  const expiresIso = new Date(expiresMs).toISOString();
-  const now = Date.now();
-  if (now > expiresMs) {
-    out.textContent = `⚠️ Gift Card expirado em ${expiresIso}`;
-    return;
-  }
-
-  const iv = buf.slice(12, 24);
-  const ciphertext = buf.slice(24);
-
-  const refBuf = await refFile.arrayBuffer();
-  const keyMat = await crypto.subtle.digest("SHA-256", refBuf);
-  const key = await crypto.subtle.importKey("raw", keyMat, {name:"AES-GCM"}, false, ["decrypt"]);
-
   try {
+    // 1) Lê e valida cabeçalho
+    const u8 = new Uint8Array(await gcfile.arrayBuffer());
+    const { header, expiresMs, iv, ciphertext } = readHeader(u8);
+    const expiresIso = new Date(expiresMs).toISOString();
+
+    // 2) Busca hora confiável em UTC
+    out.textContent = "Obtendo hora UTC do servidor público...";
+    const utcNowMs = await getUtcNowMs();
+
+    // 3) Compara expiração usando hora da API (não usa relógio local)
+    if (!Number.isFinite(expiresMs) || expiresMs <= 0) {
+      out.textContent = "Cabeçalho sem validade válida.";
+      return;
+    }
+    if (utcNowMs > expiresMs) {
+      out.textContent = `⚠️ Gift Card expirado em ${expiresIso} (comparado com UTC da API).`;
+      return;
+    }
+
+    // 4) Deriva chave a partir do arquivo de referência
+    out.textContent = "Derivando chave e descriptografando...";
+    const refBuf = await refFile.arrayBuffer();
+    const keyMat = await crypto.subtle.digest("SHA-256", refBuf);
+    const key = await crypto.subtle.importKey("raw", keyMat, {name:"AES-GCM"}, false, ["decrypt"]);
+
+    // 5) Descriptografa com AAD = header autenticado
     const plaintextBuf = await crypto.subtle.decrypt({name:"AES-GCM", iv, additionalData: header}, key, ciphertext);
     const payload = JSON.parse(dec.decode(plaintextBuf));
-    out.textContent = `✅ Gift Card válido até ${expiresIso}\nConteúdo:\n` + JSON.stringify(payload, null, 2);
-  } catch(e) {
-    out.textContent = "❌ Falha na descriptografia ou chave incorreta.";
+
+    // 6) Exibe dados
+    const lines = [
+      `✅ Gift Card válido (até ${expiresIso} UTC)`,
+      `giftId: ${payload.giftId}`,
+      `valor: ${payload.meta?.value ?? "—"} ${payload.meta?.currency ?? ""}`,
+      `validade (payload): ${payload.meta?.expiresAt || "—"}`
+    ];
+    out.textContent = lines.join("\n");
+
+    // 7) Se houver anexo, oferece download
+    if (payload.attachment?.base64) {
+      const a = document.createElement("a");
+      a.href = payload.attachment.base64;
+      a.download = payload.attachment.name || "anexo";
+      a.textContent = "\nBaixar anexo";
+      out.appendChild(a);
+    }
+
+  } catch (e) {
+    out.textContent = "❌ Erro: " + (e && e.message ? e.message : String(e));
   }
 };
 </script>
