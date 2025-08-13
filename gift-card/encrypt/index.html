@@ -45,7 +45,7 @@ async function fileToBase64(file){
 }
 
 async function getTrustedNowMs(){
-  const r = await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC");
+  const r = await fetch("http://worldtimeapi.org/api/timezone/America/Fortaleza");
   const j = await r.json();
   return j.unixtime * 1000;
 }
