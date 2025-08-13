@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Criar Gift Card</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; background: #eef; }
+    .container { background: white; padding: 2em; border-radius: 8px; max-width: 600px; margin: auto; }
+    input, textarea, button { margin-bottom: 1em; width: 100%; padding: 0.5em; font-size: 1em; }
+    button { width: auto; }
+    .success { margin-top: 1em; padding: 1em; background: #e0ffe0; border: 1px solid #00aa00; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🎁 Criar Gift Card</h2>
+    <p>Preencha os dados e envie o arquivo de referência para gerar um gift card seguro.</p>
+
+    <label>Mensagem do Gift Card:</label>
+    <textarea id="message" rows="4" placeholder="Ex: Parabéns, Sand! Você ganhou R$50 de presente."></textarea>
+
+    <label>Arquivo de Referência:</label>
+    <input type="file" id="referenceFile">
+
+    <button onclick="createGiftCard()">Gerar Gift Card</button>
+
+    <div id="success" class="success" style="display:none;"></div>
+  </div>
+
+  <script>
+    async function createGiftCard() {
+      const message = document.getElementById('message').value.trim();
+      const referenceFile = document.getElementById('referenceFile').files[0];
+      const successDiv = document.getElementById('success');
+
+      if (!message || !referenceFile) {
+        alert("Preencha a mensagem e envie o arquivo de referência.");
+        return;
+      }
+
+      // Codifica a mensagem
+      const encoder = new TextEncoder();
+      const data = encoder.encode(message);
+
+      // Lê o arquivo de referência
+      const referenceData = await referenceFile.arrayBuffer();
+
+      // Gera a chave criptográfica
+      const keyMaterial = await crypto.subtle.digest("SHA-256", referenceData);
+      const key = await crypto.subtle.importKey("raw", keyMaterial, "AES-GCM", false, ["encrypt"]);
+
+      // Gera IV aleatório
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+
+      // Criptografa a mensagem
+      const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
+
+      // Junta IV + dados criptografados
+      const finalData = new Uint8Array(iv.length + encrypted.byteLength);
+      finalData.set(iv, 0);
+      finalData.set(new Uint8Array(encrypted), iv.length);
+
+      // Cria e baixa o arquivo .bin
+      const blob = new Blob([finalData], { type: "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "giftcard.bin";
+      a.click();
+      URL.revokeObjectURL(url);
+
+      successDiv.innerHTML = `✅ Gift Card gerado com sucesso!<br>O arquivo <strong>giftcard.bin</strong> foi baixado. Guarde o arquivo de referência para ativação.`;
+      successDiv.style.display = "block";
+    }
+  </script>
+</body>
+</html>
