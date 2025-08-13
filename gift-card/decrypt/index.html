@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><title>Ativar Gift Card</title>
+<style>body{font-family:sans-serif;padding:2rem;max-width:760px;margin:auto}</style>
+</head>
+<body>
+<h2>🔓 Ativar Gift Card</h2>
+
+<label>Arquivo do gift card (.bin)</label>
+<input id="bin" type="file" />
+
+<label>Arquivo de referência (o mesmo usado na criação)</label>
+<input id="ref" type="file" />
+
+<button id="dec">Descriptografar</button>
+
+<div id="info" style="margin-top:1rem"></div>
+<div id="server" style="margin-top:1rem"></div>
+
+<script>
+const API_BASE = ""; // defina sua API do jogo (Vercel, etc.)
+const enc = new TextEncoder(), dec = new TextDecoder();
+
+async function sha256Hex(str){
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+document.getElementById("dec").onclick = async () => {
+  const binFile = document.getElementById("bin").files[0];
+  const refFile = document.getElementById("ref").files[0];
+  const info = document.getElementById("info");
+  const server = document.getElementById("server");
+  info.textContent = ""; server.textContent = "";
+
+  if (!binFile || !refFile) { info.textContent = "Envie o .bin e o arquivo de referência."; return; }
+
+  // Lê .bin
+  const buf = await binFile.arrayBuffer();
+  const iv = new Uint8Array(buf.slice(0,12));
+  const ciphertext = buf.slice(12);
+
+  // Deriva chave do arquivo de referência
+  const refBuf = await refFile.arrayBuffer();
+  const keyMat = await crypto.subtle.digest("SHA-256", refBuf);
+  const key = await crypto.subtle.importKey("raw", keyMat, {name:"AES-GCM"}, false, ["decrypt"]);
+
+  // Descriptografa
+  try {
+    const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, ciphertext);
+    const data = JSON.parse(new TextDecoder().decode(plain));
+
+    // Mostra metadados e permite baixar anexo, se houver
+    let html = `<strong>giftId:</strong> ${data.giftId}<br>
+                <strong>valor:</strong> ${data.meta.value} ${data.meta.currency}<br>
+                <strong>validade:</strong> ${data.meta.expiresAt || "—"}<br>`;
+    if (data.attachment?.base64) {
+      const a = document.createElement("a");
+      a.href = data.attachment.base64; a.download = data.attachment.name || "anexo";
+      a.textContent = "Baixar anexo";
+      const wrap = document.createElement("div"); wrap.appendChild(a);
+      info.innerHTML = html; info.appendChild(wrap);
+    } else {
+      info.innerHTML = html;
+    }
+
+    // Checagem no servidor do jogo (opcional, mas recomendado)
+    if (API_BASE) {
+      const codeHash = await sha256Hex(data.code);
+      // 1) Verificar se pode ativar
+      const checkRes = await fetch(`${API_BASE}/api/redeem/check?giftId=${encodeURIComponent(data.giftId)}&codeHash=${codeHash}`);
+      const check = await checkRes.json();
+      server.innerHTML = `<pre>Check: ${JSON.stringify(check, null, 2)}</pre>`;
+
+      // 2) Se permitido, botão para ativar
+      if (check.activable) {
+        const btn = document.createElement("button");
+        btn.textContent = "Ativar agora";
+        btn.onclick = async () => {
+          const actRes = await fetch(`${API_BASE}/api/redeem/activate`, {
+            method:"POST", headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({ giftId: data.giftId, codeHash })
+          });
+          const act = await actRes.json();
+          server.innerHTML = `<pre>Ativado: ${JSON.stringify(act, null, 2)}</pre>`;
+        };
+        server.appendChild(btn);
+      }
+    }
+  } catch(e) {
+    info.textContent = "Falha ao descriptografar. Confirme o arquivo de referência.";
+  }
+};
+</script>
+</body>
+</html>
