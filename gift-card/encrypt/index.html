@@ -1,95 +1,453 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<title>Criar Gift Card</title>
-<style>
-body { font-family: sans-serif; max-width: 800px; margin: 20px auto; }
-label { display:block; margin-top: 10px; font-weight: bold; }
-input, textarea, button { width: 100%; padding: 8px; margin-top: 4px; }
-pre { background: #f6f8fa; padding: 8px; white-space: pre-wrap; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Criar cartão criptografado</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0b0c10;
+      --fg: #e6e6e6;
+      --muted: #9aa0a6;
+      --brand: #6aa9ff;
+      --ok: #12b886;
+      --warn: #f59f00;
+      --err: #fa5252;
+      --card: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.12);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+    }
+    main {
+      max-width: 920px;
+      margin: 32px auto;
+      padding: 0 16px 48px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin: 0 0 16px;
+      letter-spacing: 0.2px;
+    }
+    p.note {
+      color: var(--muted);
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+    input[type="text"], input[type="datetime-local"], textarea {
+      width: 100%;
+      box-sizing: border-box;
+      background: transparent;
+      color: var(--fg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    input[type="text"]:focus, input[type="datetime-local"]:focus, textarea:focus {
+      border-color: var(--brand);
+    }
+    input[type="file"] {
+      width: 100%;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      font-family: inherit;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .row > * {
+      flex: 1 1 auto;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+      color: var(--fg);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.02s ease-in-out, border-color 0.15s ease;
+      font-weight: 600;
+    }
+    .btn:hover { border-color: var(--brand); }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary {
+      border-color: rgba(106,169,255,0.65);
+      box-shadow: inset 0 0 0 1px rgba(106,169,255,0.35);
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .hint {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    pre#log {
+      margin: 0;
+      font-family: var(--mono);
+      background: #050607;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 12px;
+      max-height: 320px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .ok { color: var(--ok); }
+    .warn { color: var(--warn); }
+    .err { color: var(--err); }
+    .muted { color: var(--muted); }
+    small.kbd {
+      font-family: var(--mono);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 6px;
+    }
+    @media (max-width: 820px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-<h1>🔐 Criar Gift Card</h1>
+  <main>
+    <h1>Gerar cartão criptografado</h1>
+    <p class="note">Este utilitário valida a chave descartável via <small class="kbd">keys.json</small>, fixa a expiração em UTC e criptografa a mensagem com AES‑GCM (chave derivada de HKDF do arquivo de referência + sal).</p>
 
-<label>Chave descartável:</label>
-<input type="text" id="dispKey" placeholder="KEY-EXEMPLO-123">
+    <div class="grid">
+      <div class="card">
+        <div style="margin-bottom:14px">
+          <label for="refFile">Arquivo de referência (segredo base)</label>
+          <input id="refFile" type="file" />
+          <div class="hint">Use o mesmo arquivo depois para abrir o cartão. Mantê-lo em sigilo é essencial.</div>
+        </div>
 
-<label>Data/hora de expiração (UTC):</label>
-<input type="datetime-local" id="expires">
+        <div style="margin-bottom:14px">
+          <label for="dKey">Chave descartável</label>
+          <input id="dKey" type="text" placeholder="ex.: 8F4A-2C7D-..." />
+          <div class="hint">Será validada no <small class="kbd">keys.json</small> e vinculada na AAD do GCM.</div>
+        </div>
 
-<label>Conteúdo do gift (JSON):</label>
-<textarea id="payload" rows="6"></textarea>
+        <div style="margin-bottom:14px">
+          <label for="exp">Expiração (UTC)</label>
+          <input id="exp" type="datetime-local" />
+          <div class="hint">Interpretada como UTC. O cartão só deve ser criado se ainda não estiver expirado no horário oficial (UTC).</div>
+        </div>
 
-<label>Nome do arquivo:</label>
-<input type="text" id="outName" value="giftcard.bin">
+        <div style="margin-bottom:14px">
+          <label for="salt">Sal criptográfico (hex)</label>
+          <div class="row">
+            <input id="salt" type="text" placeholder="32+ hex chars (recomendado gerar)" />
+            <button id="btnSalt" class="btn" type="button">Gerar sal</button>
+          </div>
+          <div class="hint">Usado como <em>salt</em> do HKDF. Salvar junto ao cartão é seguro; não reutilize em contextos diferentes.</div>
+        </div>
+      </div>
 
-<button id="gen">Gerar .bin</button>
-<pre id="log"></pre>
+      <div class="card">
+        <div>
+          <label for="msg">Mensagem a proteger</label>
+          <textarea id="msg" placeholder="Conteúdo do cartão (texto simples)"></textarea>
+        </div>
+        <div class="actions">
+          <button id="btnGen" class="btn primary" type="button">Gerar cartão (.bin)</button>
+          <span id="status" class="muted"></span>
+        </div>
+        <div class="hint">O arquivo .bin conterá: versão, algoritmo, expiração, IV, sal, hash do arquivo de referência e o ciphertext (base64url).</div>
+      </div>
+    </div>
 
-<script>
-const log = msg => document.getElementById('log').textContent += msg + "\n";
-const enc = new TextEncoder();
+    <div class="card" style="margin-top:16px">
+      <label>Log</label>
+      <pre id="log" aria-live="polite"></pre>
+    </div>
+  </main>
 
-// Busca hora UTC real de um servidor confiável
-async function getServerUTC() {
-  const resp = await fetch("https://worldtimeapi.org/api/timezone/America/Fortaleza");
-  if (!resp.ok) throw new Error("Falha ao obter hora");
-  const data = await resp.json();
-  return new Date(data.datetime); // retorna objeto Date em UTC
-}
+  <script>
+    // ========= Utilitários =========
+    const te = new TextEncoder();
+    const td = new TextDecoder();
 
-async function generateBin(payloadObj, meta) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const key = await crypto.subtle.generateKey(
-    { name: "AES-GCM", length: 256 },
-    true, ["encrypt"]
-  );
-  const rawKey = await crypto.subtle.exportKey("raw", key);
-  const aad = enc.encode(`${meta.key}|${meta.exp}`);
-  const cipher = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv, additionalData: aad },
-    key,
-    enc.encode(JSON.stringify(payloadObj))
-  );
-  return { cipher, iv, rawKey };
-}
+    const logEl = document.getElementById('log');
+    const statusEl = document.getElementById('status');
+    const btnGen = document.getElementById('btnGen');
+    const btnSalt = document.getElementById('btnSalt');
 
-document.getElementById('gen').onclick = async () => {
-  document.getElementById('log').textContent = "";
-  try {
-    const dKey = document.getElementById('dispKey').value.trim();
-    const expInput = document.getElementById('expires').value;
-    const payloadStr = document.getElementById('payload').value.trim();
-    const outName = document.getElementById('outName').value.trim() || "giftcard.bin";
-    if (!dKey || !expInput || !payloadStr) throw new Error("Preencha todos os campos");
+    function log(line, cls) {
+      const prefix = cls === 'err' ? '✖ ' : cls === 'ok' ? '✔ ' : cls === 'warn' ? '⚠ ' : '• ';
+      const node = document.createElement('div');
+      if (cls) node.className = cls;
+      node.textContent = prefix + line;
+      logEl.appendChild(node);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
 
-    log("⏳ Obtendo hora UTC do servidor...");
-    const serverTime = await getServerUTC();
-    log("Hora do servidor: " + serverTime.toISOString());
+    function clearLog() {
+      logEl.textContent = '';
+    }
 
-    const expTime = new Date(expInput + "Z");
-    if (serverTime > expTime) throw new Error("Data de expiração já passou segundo o servidor");
+    function setBusy(b) {
+      btnGen.disabled = b;
+      btnSalt.disabled = b;
+      statusEl.textContent = b ? 'Processando…' : '';
+    }
 
-    const payload = JSON.parse(payloadStr);
-    payload.exp = expTime.toISOString();
+    function bytesToHex(buf) {
+      return [...buf].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
 
-    const { cipher, iv, rawKey } = await generateBin(payload, { key: dKey, exp: payload.exp });
+    function hexToBytes(hex) {
+      const clean = hex.trim().replace(/^0x/i,'').replace(/\s+/g,'');
+      if (clean.length % 2 !== 0) throw new Error('Hex inválido (comprimento ímpar)');
+      const out = new Uint8Array(clean.length / 2);
+      for (let i = 0; i < clean.length; i += 2) {
+        out[i/2] = parseInt(clean.slice(i, i+2), 16);
+      }
+      return out;
+    }
 
-    const blob = new Blob([cipher], { type: "application/octet-stream" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = outName;
-    a.click();
+    function b64urlFromBytes(bytes) {
+      let bin = '';
+      bytes.forEach(b => bin += String.fromCharCode(b));
+      const b64 = btoa(bin);
+      return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    }
 
-    log("✅ Gift Card gerado");
-    log("🔑 Chave AES (Base64): " + btoa(String.fromCharCode(...new Uint8Array(rawKey))));
-    log("📌 IV (Base64): " + btoa(String.fromCharCode(...new Uint8Array(iv))));
-  } catch (err) {
-    log("❌ Erro: " + err.message);
-  }
-};
-</script>
+    async function sha256Bytes(data) {
+      const buf = await crypto.subtle.digest('SHA-256', data);
+      return new Uint8Array(buf);
+    }
+
+    async function sha256Hex(data) {
+      return bytesToHex(await sha256Bytes(data));
+    }
+
+    function randomBytes(n) {
+      const a = new Uint8Array(n);
+      crypto.getRandomValues(a);
+      return a;
+    }
+
+    async function fetchKeys() {
+      const r = await fetch('./keys.json', { cache: 'no-store' });
+      if (!r.ok) throw new Error('Não foi possível carregar keys.json');
+      return await r.json();
+    }
+
+    function isKeyAllowed(db, key) {
+      const k = String(key || '').trim();
+      const valids = new Set(db.validas || []);
+      const invalids = new Set(db.invalidas || []);
+      if (k.length === 0) return false;
+      if (invalids.has(k)) return false;
+      if (valids.size > 0) return valids.has(k);
+      return !invalids.has(k);
+    }
+
+    async function getUtcNowIso() {
+      const r = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC', { cache: 'no-store' });
+      if (!r.ok) throw new Error('Falha ao consultar hora UTC');
+      const j = await r.json();
+      // utc_datetime vem com offset; normalizar em ISO Z
+      const iso = new Date(j.utc_datetime).toISOString();
+      return iso;
+    }
+
+    function parseUtcFromDatetimeLocal(v) {
+      // Interpreta o value (YYYY-MM-DDTHH:mm[(:ss[.sss])]) como UTC exato
+      if (!v) throw new Error('Expiração não informada');
+      // Garante segundos
+      let t = v;
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) t += ':00';
+      return new Date(t + 'Z').toISOString();
+    }
+
+    // ========= Fluxo principal =========
+    btnSalt.addEventListener('click', () => {
+      const salt = randomBytes(16 + Math.floor(Math.random()*17)); // 16–32 bytes
+      document.getElementById('salt').value = bytesToHex(salt);
+      log('Sal aleatório gerado (' + salt.length + ' bytes)', 'ok');
+    });
+
+    btnGen.addEventListener('click', async () => {
+      clearLog();
+      setBusy(true);
+      try {
+        // Inputs
+        const refFile = document.getElementById('refFile').files[0];
+        const dKey = document.getElementById('dKey').value.trim();
+        const expLocal = document.getElementById('exp').value;
+        const saltHex = document.getElementById('salt').value.trim();
+        const msg = document.getElementById('msg').value;
+
+        if (!refFile) throw new Error('Selecione o arquivo de referência.');
+        if (!dKey) throw new Error('Informe a chave descartável.');
+        if (!expLocal) throw new Error('Informe a expiração (UTC).');
+        if (!msg) throw new Error('Digite a mensagem a proteger.');
+
+        // 1) keys.json
+        log('Verificando chave no keys.json…');
+        const keysDb = await fetchKeys();
+        if (!isKeyAllowed(keysDb, dKey)) {
+          throw new Error('Chave descartável inválida ou revogada em keys.json.');
+        }
+        log('Chave aceita pelo keys.json.', 'ok');
+
+        // 2) Hora oficial UTC
+        log('Consultando horário oficial UTC…');
+        const nowUtcIso = await getUtcNowIso();
+        log('UTC agora: ' + nowUtcIso, 'muted');
+
+        // 3) Expiração
+        const expIso = parseUtcFromDatetimeLocal(expLocal);
+        const nowT = new Date(nowUtcIso).getTime();
+        const expT = new Date(expIso).getTime();
+        if (isNaN(expT)) throw new Error('Expiração inválida.');
+        if (nowT > expT) {
+          throw new Error('Expiração já atingida no UTC. Ajuste a data/hora.');
+        }
+        log('Expiração definida para: ' + expIso, 'ok');
+
+        // 4) Coleta material de referência e sal
+        log('Lendo arquivo de referência…');
+        const refBytes = new Uint8Array(await refFile.arrayBuffer());
+        const refHash = await sha256Hex(refBytes);
+        log('Hash do arquivo de referência (SHA-256): ' + refHash.slice(0, 16) + '…', 'muted');
+
+        let saltBytes;
+        if (saltHex) {
+          saltBytes = hexToBytes(saltHex);
+          if (saltBytes.length < 8) throw new Error('Sal muito curto (mínimo 8 bytes).');
+          log('Sal informado: ' + saltBytes.length + ' bytes.', 'muted');
+        } else {
+          saltBytes = randomBytes(16);
+          log('Sal não informado; gerado aleatório (16 bytes).', 'warn');
+        }
+
+        // 5) Derivação HKDF -> AES-GCM-256
+        log('Derivando chave com HKDF (SHA-256)…');
+        const ikmKey = await crypto.subtle.importKey(
+          'raw',
+          refBytes,
+          'HKDF',
+          false,
+          ['deriveKey']
+        );
+        const info = te.encode('cartao-v1');
+        const aesKey = await crypto.subtle.deriveKey(
+          { name: 'HKDF', hash: 'SHA-256', salt: saltBytes, info },
+          ikmKey,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt']
+        );
+        log('Chave derivada pronta.', 'ok');
+
+        // 6) Preparar AAD e IV
+        const aadStr = dKey + '|' + expIso;
+        const aad = te.encode(aadStr);
+        const iv = randomBytes(12);
+
+        // 7) Criptografia AES-GCM
+        log('Criptografando mensagem…');
+        const pt = te.encode(msg);
+        const ctBuf = await crypto.subtle.encrypt(
+          { name: 'AES-GCM', iv, additionalData: aad },
+          aesKey,
+          pt
+        );
+        const ct = new Uint8Array(ctBuf);
+        log('Mensagem criptografada (' + ct.length + ' bytes).', 'ok');
+
+        // 8) Montar pacote .bin (JSON)
+        const payload = {
+          v: 1,
+          alg: 'AES-GCM-256/HKDF-SHA256',
+          exp: expIso,
+          iv: b64urlFromBytes(iv),
+          salt: b64urlFromBytes(saltBytes),
+          refHash: refHash,             // para validação posterior
+          ct: b64urlFromBytes(ct)
+        };
+
+        const blob = new Blob([JSON.stringify(payload, null, 0)], { type: 'application/octet-stream' });
+        const utcForName = nowUtcIso
+          .replace(/[:]/g, '')
+          .replace(/\.\d+Z$/, 'Z')
+          .replace('T', '_');
+        const fname = `cartao_${utcForName}.bin`;
+
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fname;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          URL.revokeObjectURL(a.href);
+          a.remove();
+        }, 0);
+
+        log('Cartão salvo: ' + fname, 'ok');
+        statusEl.textContent = 'Concluído.';
+      } catch (err) {
+        console.error(err);
+        log(String(err.message || err), 'err');
+        statusEl.textContent = 'Erro.';
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    // Sugestão: preencher expiração com +24h por padrão
+    (function presetDefaults() {
+      try {
+        const expEl = document.getElementById('exp');
+        const now = new Date();
+        // Definir default para +24h em UTC (formatar como datetime-local sem timezone)
+        const t = new Date(Date.UTC(
+          now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+          now.getUTCHours(), now.getUTCMinutes()
+        ));
+        t.setUTCDate(t.getUTCDate() + 1);
+        const pad = (n) => String(n).padStart(2, '0');
+        const isoLocal = `${t.getUTCFullYear()}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())}T${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}`;
+        expEl.value = isoLocal;
+      } catch {}
+    })();
+  </script>
 </body>
 </html>
