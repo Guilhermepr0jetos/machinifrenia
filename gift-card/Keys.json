@@ -1,0 +1,13 @@
+{
+  "versao": 1,
+  "validas": [
+    "KEY-EXEMPLO-123",
+    "KEY-EXEMPLO-456",
+    "KEY-PROMO-2025",
+    "KEY-TESTE-ABC"
+  ],
+  "invalidas": [
+    "KEY-REVOGADA-999",
+    "KEY-EXPIRADA-OLD"
+  ]
+}
