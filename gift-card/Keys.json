@@ -4,7 +4,8 @@
     "KEY-EXEMPLO-123",
     "KEY-EXEMPLO-456",
     "KEY-PROMO-2025",
-    "KEY-TESTE-ABC"
+    "KEY-TESTE-ABC",
+    "KEY-BTC-6USD-01"
   ],
   "invalidas": [
     "KEY-REVOGADA-999",
