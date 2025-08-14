@@ -4,19 +4,16 @@
 <meta charset="utf-8">
 <title>Criar Gift Card</title>
 <style>
-body { font-family: sans-serif; margin: 24px; max-width: 800px; }
-label { display:block; margin-top: 12px; font-weight: 600; }
+body { font-family: sans-serif; max-width: 800px; margin: 20px auto; }
+label { display:block; margin-top: 10px; font-weight: bold; }
 input, textarea, button { width: 100%; padding: 8px; margin-top: 4px; }
-pre { background: #f6f8fa; padding: 8px; }
+pre { background: #f6f8fa; padding: 8px; white-space: pre-wrap; }
 </style>
 </head>
 <body>
-<h1>🔐 Criar Gift Card (.bin)</h1>
+<h1>🔐 Criar Gift Card</h1>
 
-<label>Arquivo de referência:</label>
-<input type="file" id="refFile">
-
-<label>Chave descartável (estará no keys.json válido):</label>
+<label>Chave descartável:</label>
 <input type="text" id="dispKey" placeholder="KEY-EXEMPLO-123">
 
 <label>Data/hora de expiração (UTC):</label>
@@ -32,67 +29,66 @@ pre { background: #f6f8fa; padding: 8px; }
 <pre id="log"></pre>
 
 <script>
-const log = m => document.getElementById('log').textContent += m + "\n";
-const toBytes = s => new TextEncoder().encode(s);
-const b64e = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
-async function sha256(buf) { return await crypto.subtle.digest("SHA-256", buf); }
-async function readBuf(file) {
-  return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsArrayBuffer(file);});
+const log = msg => document.getElementById('log').textContent += msg + "\n";
+const enc = new TextEncoder();
+
+// Busca hora UTC real de um servidor confiável
+async function getServerUTC() {
+  const resp = await fetch("https://worldtimeapi.org/api/timezone/America/Fortaleza");
+  if (!resp.ok) throw new Error("Falha ao obter hora");
+  const data = await resp.json();
+  return new Date(data.datetime); // retorna objeto Date em UTC
 }
-async function fetchKeys(){
-  const r = await fetch('./keys.json', {cache:"no-store"});
-  if(!r.ok) throw new Error("Falha ao ler keys.json");
-  return await r.json();
+
+async function generateBin(payloadObj, meta) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    true, ["encrypt"]
+  );
+  const rawKey = await crypto.subtle.exportKey("raw", key);
+  const aad = enc.encode(`${meta.key}|${meta.exp}`);
+  const cipher = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv, additionalData: aad },
+    key,
+    enc.encode(JSON.stringify(payloadObj))
+  );
+  return { cipher, iv, rawKey };
 }
-function isKeyAllowed(db, key){
-  const k = key.trim();
-  const valids = new Set(db.validas||[]);
-  const invalids = new Set(db.invalidas||[]);
-  if(invalids.has(k)) return false;
-  if(valids.size>0) return valids.has(k);
-  return !invalids.has(k);
-}
+
 document.getElementById('gen').onclick = async () => {
-  document.getElementById('log').textContent="";
-  try{
-    const refF = document.getElementById('refFile').files[0];
+  document.getElementById('log').textContent = "";
+  try {
     const dKey = document.getElementById('dispKey').value.trim();
-    const expiresVal = document.getElementById('expires').value;
+    const expInput = document.getElementById('expires').value;
     const payloadStr = document.getElementById('payload').value.trim();
     const outName = document.getElementById('outName').value.trim() || "giftcard.bin";
-    if(!refF || !dKey || !payloadStr) throw new Error("Campos obrigatórios faltando");
+    if (!dKey || !expInput || !payloadStr) throw new Error("Preencha todos os campos");
 
-    const keysdb = await fetchKeys();
-    if(!isKeyAllowed(keysdb,dKey)) throw new Error("Chave não está válida no keys.json");
-    log("Chave válida");
+    log("⏳ Obtendo hora UTC do servidor...");
+    const serverTime = await getServerUTC();
+    log("Hora do servidor: " + serverTime.toISOString());
 
-    let expMs;
-    if(expiresVal){
-      expMs = new Date(expiresVal).getTime();
-    } else {
-      expMs = Date.now() + 180*864e5; // 180 dias
-    }
-    const expIso = new Date(expMs).toISOString();
+    const expTime = new Date(expInput + "Z");
+    if (serverTime > expTime) throw new Error("Data de expiração já passou segundo o servidor");
 
     const payload = JSON.parse(payloadStr);
-    payload.exp = expIso;
+    payload.exp = expTime.toISOString();
 
-    const refBuf = await readBuf(refF);
-    const refHash = await sha256(refBuf);
+    const { cipher, iv, rawKey } = await generateBin(payload, { key: dKey, exp: payload.exp });
 
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const baseKey = await crypto.subtle.importKey("raw",refHash,"HKDF",false,["deriveKey"]);
-    const aesKey = await crypto.subtle.deriveKey({name:"HKDF",hash:"SHA-256",salt,info:toBytes("giftcard-v1")}, baseKey, {name:"AES-GCM",length:256}, false, ["encrypt"]);
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const aad = toBytes(dKey+"|"+expIso);
+    const blob = new Blob([cipher], { type: "application/octet-stream" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = outName;
+    a.click();
 
-    const ct = await crypto.subtle.encrypt({name:"AES-GCM",iv,additionalData:aad},aesKey,toBytes(JSON.stringify(payload)));
-
-    const artifact = {v:1,salt:b64e(salt),iv:b64e(iv),exp:expIso,ct:b64e(ct)};
-    const blob = new Blob([JSON.stringify(artifact)],{type:"application/octet-stream"});
-    const a = document.createElement('a');a.href=URL.createObjectURL(blob);a.download=outName;a.click();URL.revokeObjectURL(a.href);
-    log("✅ Gift card criado com expiração "+expIso);
-  }catch(e){ log("Erro: "+e.message); }
+    log("✅ Gift Card gerado");
+    log("🔑 Chave AES (Base64): " + btoa(String.fromCharCode(...new Uint8Array(rawKey))));
+    log("📌 IV (Base64): " + btoa(String.fromCharCode(...new Uint8Array(iv))));
+  } catch (err) {
+    log("❌ Erro: " + err.message);
+  }
 };
 </script>
 </body>
