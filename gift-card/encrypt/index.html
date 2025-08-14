@@ -1,111 +1,98 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!doctype html>
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8"><title>Criar Gift Card Seguro</title>
+<meta charset="utf-8">
+<title>Criar Gift Card</title>
 <style>
-  body{font-family:sans-serif;padding:2rem;max-width:760px;margin:auto}
-  label{display:block;margin-top:1rem}
+body { font-family: sans-serif; margin: 24px; max-width: 800px; }
+label { display:block; margin-top: 12px; font-weight: 600; }
+input, textarea, button { width: 100%; padding: 8px; margin-top: 4px; }
+pre { background: #f6f8fa; padding: 8px; }
 </style>
 </head>
 <body>
-<h2>🔐 Criar Gift Card Seguro</h2>
-
-<label>Código do gift card:</label>
-<input id="code" placeholder="ex: 32+ chars aleatórios" />
-
-<label>Valor</label>
-<input id="value" type="number" min="1" value="50" />
-
-<label>Moeda</label>
-<input id="currency" value="BRL" />
-
-<label>Validade (opcional; UTC):</label>
-<input id="expires" type="datetime-local" />
+<h1>🔐 Criar Gift Card (.bin)</h1>
 
 <label>Arquivo de referência:</label>
-<input id="refFile" type="file" />
+<input type="file" id="refFile">
 
-<label>Anexo (opcional):</label>
-<input id="attach" type="file" />
+<label>Chave descartável (estará no keys.json válido):</label>
+<input type="text" id="dispKey" placeholder="KEY-EXEMPLO-123">
 
-<button id="gen">Gerar giftcard.bin</button>
-<pre id="out"></pre>
+<label>Data/hora de expiração (UTC):</label>
+<input type="datetime-local" id="expires">
+
+<label>Conteúdo do gift (JSON):</label>
+<textarea id="payload" rows="6"></textarea>
+
+<label>Nome do arquivo:</label>
+<input type="text" id="outName" value="giftcard.bin">
+
+<button id="gen">Gerar .bin</button>
+<pre id="log"></pre>
 
 <script>
-const enc = new TextEncoder();
-
-function uuidv4(){
-  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+const log = m => document.getElementById('log').textContent += m + "\n";
+const toBytes = s => new TextEncoder().encode(s);
+const b64e = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+async function sha256(buf) { return await crypto.subtle.digest("SHA-256", buf); }
+async function readBuf(file) {
+  return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsArrayBuffer(file);});
 }
-
-async function fileToBase64(file){
-  const buf = await file.arrayBuffer();
-  const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-  return `data:${file.type || "application/octet-stream"};base64,${b64}`;
+async function fetchKeys(){
+  const r = await fetch('./keys.json', {cache:"no-store"});
+  if(!r.ok) throw new Error("Falha ao ler keys.json");
+  return await r.json();
 }
-
-async function getTrustedNowMs(){
-  const r = await fetch("https://worldtimeapi.org/api/timezone/America/Fortaleza");
-  const j = await r.json();
-  return j.unixtime * 1000;
+function isKeyAllowed(db, key){
+  const k = key.trim();
+  const valids = new Set(db.validas||[]);
+  const invalids = new Set(db.invalidas||[]);
+  if(invalids.has(k)) return false;
+  if(valids.size>0) return valids.has(k);
+  return !invalids.has(k);
 }
+document.getElementById('gen').onclick = async () => {
+  document.getElementById('log').textContent="";
+  try{
+    const refF = document.getElementById('refFile').files[0];
+    const dKey = document.getElementById('dispKey').value.trim();
+    const expiresVal = document.getElementById('expires').value;
+    const payloadStr = document.getElementById('payload').value.trim();
+    const outName = document.getElementById('outName').value.trim() || "giftcard.bin";
+    if(!refF || !dKey || !payloadStr) throw new Error("Campos obrigatórios faltando");
 
-function writeUint64BE(view, byteOffset, value){
-  const hi = Math.floor(value / 2**32);
-  const lo = value >>> 0;
-  view.setUint32(byteOffset, hi, false);
-  view.setUint32(byteOffset + 4, lo, false);
-}
+    const keysdb = await fetchKeys();
+    if(!isKeyAllowed(keysdb,dKey)) throw new Error("Chave não está válida no keys.json");
+    log("Chave válida");
 
-document.getElementById("gen").onclick = async () => {
-  const code = document.getElementById("code").value.trim();
-  const value = parseFloat(document.getElementById("value").value);
-  const currency = document.getElementById("currency").value.trim() || "BRL";
-  const expiresEl = document.getElementById("expires").value;
-  const refFile = document.getElementById("refFile").files[0];
-  const attach = document.getElementById("attach").files[0];
-  const out = document.getElementById("out");
-  out.textContent = "";
+    let expMs;
+    if(expiresVal){
+      expMs = new Date(expiresVal).getTime();
+    } else {
+      expMs = Date.now() + 180*864e5; // 180 dias
+    }
+    const expIso = new Date(expMs).toISOString();
 
-  if (!code || !refFile || !value) {
-    out.textContent = "Preencha código, valor e arquivo de referência.";
-    return;
-  }
+    const payload = JSON.parse(payloadStr);
+    payload.exp = expIso;
 
-  const trustedNow = await getTrustedNowMs();
-  const expiresMs = expiresEl ? new Date(expiresEl).getTime() : trustedNow + 180 * 864e5;
-  const expiresIso = new Date(expiresMs).toISOString();
+    const refBuf = await readBuf(refF);
+    const refHash = await sha256(refBuf);
 
-  const giftId = uuidv4();
-  const payload = { giftId, code, meta: { value, currency, expiresAt: expiresIso }, attachment: null };
-  if (attach) {
-    payload.attachment = { name: attach.name, type: attach.type || "application/octet-stream", base64: await fileToBase64(attach) };
-  }
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const baseKey = await crypto.subtle.importKey("raw",refHash,"HKDF",false,["deriveKey"]);
+    const aesKey = await crypto.subtle.deriveKey({name:"HKDF",hash:"SHA-256",salt,info:toBytes("giftcard-v1")}, baseKey, {name:"AES-GCM",length:256}, false, ["encrypt"]);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const aad = toBytes(dKey+"|"+expIso);
 
-  const refBuf = await refFile.arrayBuffer();
-  const keyMat = await crypto.subtle.digest("SHA-256", refBuf);
-  const key = await crypto.subtle.importKey("raw", keyMat, {name:"AES-GCM"}, false, ["encrypt"]);
+    const ct = await crypto.subtle.encrypt({name:"AES-GCM",iv,additionalData:aad},aesKey,toBytes(JSON.stringify(payload)));
 
-  const header = new Uint8Array(12);
-  header.set(enc.encode("GFC1"), 0);
-  const dv = new DataView(header.buffer);
-  writeUint64BE(dv, 4, expiresMs);
-
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const plaintext = enc.encode(JSON.stringify(payload));
-  const ciphertext = await crypto.subtle.encrypt({name:"AES-GCM", iv, additionalData: header}, key, plaintext);
-
-  const final = new Uint8Array(24 + ciphertext.byteLength);
-  final.set(header, 0);
-  final.set(iv, 12);
-  final.set(new Uint8Array(ciphertext), 24);
-
-  const blob = new Blob([final], {type:"application/octet-stream"});
-  const url = URL.createObjectURL(blob);
-  const a = Object.assign(document.createElement("a"), {href:url, download:`giftcard_${giftId}.bin`});
-  a.click(); URL.revokeObjectURL(url);
-
-  out.textContent = `✅ Gift Card criado\nexpira: ${expiresIso}`;
+    const artifact = {v:1,salt:b64e(salt),iv:b64e(iv),exp:expIso,ct:b64e(ct)};
+    const blob = new Blob([JSON.stringify(artifact)],{type:"application/octet-stream"});
+    const a = document.createElement('a');a.href=URL.createObjectURL(blob);a.download=outName;a.click();URL.revokeObjectURL(a.href);
+    log("✅ Gift card criado com expiração "+expIso);
+  }catch(e){ log("Erro: "+e.message); }
 };
 </script>
 </body>
