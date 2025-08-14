@@ -34,7 +34,7 @@ const b64d = b64 => Uint8Array.from(atob(b64),c=>c.charCodeAt(0)).buffer;
 async function sha256(buf){ return await crypto.subtle.digest("SHA-256",buf); }
 async function readBuf(file){ return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsArrayBuffer(file);}); }
 async function readText(file){ return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsText(file);}); }
-async function fetchKeys(){ const r=await fetch('./keys.json',{cache:"no-store"}); if(!r.ok) throw new Error("Falha ao ler keys.json"); return await r.json(); }
+async function fetchKeys(){ const r=await fetch('https://machinifrenia.vercel.app/gift-card/Keys.json',{cache:"no-store"}); if(!r.ok) throw new Error("Falha ao ler keys.json"); return await r.json(); }
 function isKeyAllowed(db,key){ const k=key.trim(); const valids=new Set(db.validas||[]); const invalids=new Set(db.invalidas||[]); if(invalids.has(k)) return false; if(valids.size>0) return valids.has(k); return !invalids.has(k); }
 async function getUtcNow(){ const r=await fetch("https://worldtimeapi.org/api/timezone/America/Fortaleza",{cache:"no-store"}); if(!r.ok) throw new Error("Falha ao obter hora UTC"); const j=await r.json(); return new Date(j.utc_datetime); }
 
