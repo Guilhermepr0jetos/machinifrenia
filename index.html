@@ -150,6 +150,9 @@ let bdID = 0;
     const itensPorPagina = 10; // Número de itens por página
     let paginaAtual = 1; // Página inicial
 
+async function MainCore() {
+	    	let newGameID = -1
+
 function processarHTML(data) {
   const games = [];
   const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
@@ -205,8 +208,6 @@ function abrirHTMLLocal(event) {
 
 document.getElementById("htmlFileInput").addEventListener("change", abrirHTMLLocal);
 
-async function MainCore() {
-	    	let newGameID = -1
 function tentarFonte() {
 fetch(BDbancoDeDados[bdID], {
   method: 'GET',
