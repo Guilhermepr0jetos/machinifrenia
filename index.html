@@ -20,7 +20,9 @@
 	<div id="endereçoPagina" class="elementosUserInfo">
 		
 	</div>
-	<input type="file" id="jsonFileInput" accept=".json">
+	
+	<input type="file" id="htmlFileInput" accept=".html">
+	
   	<div id='cacheON'>
 		
 	</div>
@@ -148,58 +150,60 @@ let bdID = 0;
     const itensPorPagina = 10; // Número de itens por página
     let paginaAtual = 1; // Página inicial
 
-function abrirJSONLocal(event) {
+function processarHTML(data) {
+  const games = [];
+  const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
+
+  blocks.forEach(block => {
+    const game = {};
+    const content = block.replace(/game\d+\s*{/, '').replace(/}$/, '');
+    
+    content.split('\n').forEach(line => {
+      const [key, value] = line.split('=');
+      if (key && value) {
+        game[key.trim()] = value.replace(/"/g, '').trim();
+      }
+    });
+
+    if (game.Name && game.Thumb && game.Description) {
+      games.push(game);
+    }
+  });
+
+  games.forEach(g => {
+    if (g.Name && g.Thumb && g.Description) {
+      newGameID += 1;
+      let cdn = `https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/teste${newGameID}.html`;
+      let link = "rendergame/index.html?gamelinkid=" + cdn;
+      if (g.Description.includes("redirect2324") && g.Redirect) {
+        link = g.Redirect;
+      }
+      gamesData.push({ 
+        name: g.Name, 
+        image: g.Thumb, 
+        description: g.Description, 
+        link: link 
+      });
+    }
+  });
+
+  createGameList(gamesData);
+}
+
+// --- Versão para abrir arquivo local ---
+function abrirHTMLLocal(event) {
   const file = event.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
   reader.onload = function(e) {
     const data = e.target.result;
-
-    const games = [];
-    const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
-
-    blocks.forEach(block => {
-      const game = {};
-      const content = block.replace(/game\d+\s*{/, '').replace(/}$/, '');
-      
-      content.split('\n').forEach(line => {
-        const [key, value] = line.split('=');
-        if (key && value) {
-          game[key.trim()] = value.replace(/"/g, '').trim();
-        }
-      });
-
-      if (game.Name && game.Thumb && game.Description) {
-        games.push(game);
-      }
-    });
-
-    games.forEach(g => {
-      if (g.Name && g.Thumb && g.Description) {
-        newGameID += 1;
-        let cdn = `https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/teste${newGameID}.html`;
-        let link = "rendergame/index.html?gamelinkid=" + cdn;
-        if (g.Description.includes("redirect2324")) {
-          link = `${g.Redirect}`;
-        }
-        gamesData.push({ 
-          name: g.Name, 
-          image: g.Thumb, 
-          description: g.Description, 
-          link: link 
-        });
-      }
-    });
-
-    createGameList(gamesData);
+    processarHTML(data);
   };
-
   reader.readAsText(file);
 }
 
-// Ativar quando o usuário escolher um arquivo
-document.getElementById("jsonFileInput").addEventListener("change", abrirJSONLocal);
+document.getElementById("htmlFileInput").addEventListener("change", abrirHTMLLocal);
 
 async function MainCore() {
 	    	let newGameID = -1
