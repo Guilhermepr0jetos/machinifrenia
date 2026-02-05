@@ -156,6 +156,7 @@ async function MainCore() {
 function processarHTML(data) {
   const games = [];
   gamesData = [];
+  newGameID = -1
   const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
 
   const lista = document.getElementById("barraHorizontal"); // supondo que sua lista esteja nesse container
