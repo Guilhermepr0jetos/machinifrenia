@@ -119,9 +119,7 @@
 
 	function deleteLayoutDesign(nomeID){
 	    const el = document.getElementById(nomeID);
-	    if(el){
-	        el.remove();
-	    }
+	    el.innerHTML = "";
 	}
 	
 	if(window.location.href.includes("https://guilhermepr0jetos.github.io/machinifrenia")){
