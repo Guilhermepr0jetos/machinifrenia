@@ -121,13 +121,13 @@
 	    // tenta pegar por ID
 	    const el = document.getElementById(nome);
 	    if(el){
-	        el.remove(); // remove o elemento com esse ID
+	        el.innerHTML = ""; // remove o elemento com esse ID
 	    } else {
 	        // se não for ID, tenta como classe
 	        const els = document.getElementsByClassName(nome);
 	        if(els.length > 0){
 	            // remove todos os elementos com essa classe
-	            Array.from(els).forEach(e => e.remove());
+	            Array.from(els).forEach(e => e.innerHTML = "");
 	        } else {
 	            console.warn("Nenhum elemento encontrado com id ou classe '" + nome + "'");
 	        }
