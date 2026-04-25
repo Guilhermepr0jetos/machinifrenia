@@ -118,7 +118,10 @@
 <script>
 
 	function deleteLayoutDesign(nomeID){
-		document.getElementById(nomeID).innerHTML = "";
+	    const el = document.getElementById(nomeID);
+	    if(el){
+	        el.remove();
+	    }
 	}
 	
 	if(window.location.href.includes("https://guilhermepr0jetos.github.io/machinifrenia")){
@@ -229,8 +232,9 @@ function abrirHTMLLocal(event) {
 
 document.getElementById("htmlFileInput").addEventListener("change", abrirHTMLLocal);
 document.getElementById("addHome").addEventListener("click", MainCore);
-document.getElementById("deleteHome").addEventListener("click", deleteLayoutDesign("barraHorizontal"));
-
+document.getElementById("deleteHome").addEventListener("click", () => {
+	deleteLayoutDesign("barraHorizontal");
+});
 function tentarFonte() {
 fetch(BDbancoDeDados[bdID], {
   method: 'GET',
