@@ -179,19 +179,12 @@ let bdID = 0;
 
 async function MainCore() {
 	    	let newGameID = -1
-			const lista = document.querySelector(".barraHorizontal");
 
 function processarHTML(data) {
   const games = [];
   gamesData = [];
   newGameID = -1
   const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
-
-	console.log(lista);
-
-  if (lista) {
-    lista.remove();
-  }
 
   blocks.forEach(block => {
     const game = {};
@@ -248,6 +241,11 @@ document.getElementById("deleteHome").addEventListener("click", () => {
 	deleteLayoutDesign("barraHorizontal");
 });
 function tentarFonte() {
+const lista = document.querySelector(".barraHorizontal");
+console.log(lista);
+  if (lista) {
+    lista.remove();
+  }
 fetch(BDbancoDeDados[bdID], {
   method: 'GET',
   cache: 'no-store'
