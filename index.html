@@ -241,11 +241,6 @@ document.getElementById("deleteHome").addEventListener("click", () => {
 	deleteLayoutDesign("barraHorizontal");
 });
 function tentarFonte() {
-const lista = document.querySelector(".barraHorizontal");
-console.log(lista);
-  if (lista) {
-    lista.remove();
-  }
 fetch(BDbancoDeDados[bdID], {
   method: 'GET',
   cache: 'no-store'
@@ -399,6 +394,11 @@ MainCore().then(() => {
 function createGameList(data) {
 	let Barra = document.querySelector(".barraHorizontal")
 	Barra.innerHTML = '';
+	
+	console.log(Barra);
+	  if (Barra) {
+	    Barra.remove();
+	  }
 
 	// Calcular os índices de início e fim da página atual
         const indiceInicio = (paginaAtual - 1) * itensPorPagina;
