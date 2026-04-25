@@ -187,6 +187,8 @@ function processarHTML(data) {
   newGameID = -1
   const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
 
+	console.log(lista);
+
   if (lista) {
     lista.remove();
   }
