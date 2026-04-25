@@ -179,6 +179,7 @@ let bdID = 0;
 
 async function MainCore() {
 	    	let newGameID = -1
+			const lista = document.querySelector(".barraHorizontal");
 
 function processarHTML(data) {
   const games = [];
@@ -186,7 +187,6 @@ function processarHTML(data) {
   newGameID = -1
   const blocks = data.match(/game\d+\s*{[^}]*}/g) || [];
 
-  const lista = document.querySelector(".barraHorizontal"); // supondo que sua lista esteja nesse container
   if (lista) {
     lista.remove();
   }
