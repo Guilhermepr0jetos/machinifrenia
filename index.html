@@ -6,115 +6,6 @@
 <title>assistir videos e criar paginas interessantes</title>
 <script async src="https://ss.mrmnd.com/native.js"></script>
 </head>
-<body>
-<div id="userInfo">
-  
-	<div id="conta">
-		<a href=/conta/index.html>
-			<img width="100" height="100" src="https://static.vecteezy.com/system/resources/previews/009/267/561/original/user-icon-design-free-png.png">
-		</a>
-	</div> 
-	<div class="elementosUserInfo">
-		Usuario: Default
-	</div>
-	<div id="endereçoPagina" class="elementosUserInfo">
-		
-	</div>
-	
-	<input type="file" id="htmlFileInput" accept=".html">
-	
-  	<div id='cacheON'>
-		
-	</div>
-</div>
-
-<div id="rollOut">
-	<div id="rollOutButtons">
-		<button id="addHome" onclick="MainCore()">add Home</button>
-		<button id="deleteHome" onclick="deleteLayoutDesign("barraHorizontal")">delete Home</button>
-		<button id="addEditor">add Editor</button>
-		<button id="deleteEditor">delete Editor</button>
-	</div>
-</div>
-
-<div class="barraHorizontal">
-</div>
-<iframe src="https://clideo.com/editor/" width="100%" height="100%"></iframe>
-<div class="pagination" id="pagination"></div>
-<div data-mndazid="8f663b86-1ce3-4559-9823-d48e827135c8"></div>
-</body>
-</html>
-<style>
-	body, html {
-    	height: 100%;
-	}
-
-	#ads {
-	margin: 0 auto;
-	width: 50%;	
-	}
-
-	@media (orientation: portrait) {
-		#userInfo {
-			height: 20%;
-			padding: 10px;
-			background-color: gray;
-			display: flex;
-			flex-wrap: wrap;
-		}
-	}
-	@media (orientation: landscape) {
-		#userInfo {
-			height: 100px;
-			padding: 10px;
-			background-color: gray;
-			display: flex;
-		}
-	}
-
-	@media (orientation: portrait) {
-		.elementosUserInfo {
-			padding: 3px;
-		}
-	}
-	@media (orientation: landscape) {
-		.elementosUserInfo {
-			padding: 20px;
-		}
-	}
-
-	@media (orientation: portrait) {
-		.barraHorizontal{
-			box-sizing: border-box;
-			background-color: purple;
-			display: flex;
-			flex-wrap: wrap;
-		}
-	}
-	@media (orientation: landscape) {
-		.barraHorizontal{
-			box-sizing: border-box;
-			background-color: purple;
-			display: flex;
-			flex-wrap: wrap;
-		}
-	}
-
-	@media (orientation: portrait) {
-		.menuPortfolio{
-			background-color: red;
-			flex: 30%;
-			border: 2px solid #000;
-		}
-	}
-	@media (orientation: landscape) {
-		.menuPortfolio{
-			background-color: red;
-			flex: 20%;
-			border: 2px solid #000;
-		}
-	}
-</style>
 <script>
 
 	function deleteLayoutDesign(let nomeID){
@@ -512,3 +403,112 @@ function verificarOrientacaoCarregamento() {
 	}
 }
 </script>
+<body>
+<div id="userInfo">
+  
+	<div id="conta">
+		<a href=/conta/index.html>
+			<img width="100" height="100" src="https://static.vecteezy.com/system/resources/previews/009/267/561/original/user-icon-design-free-png.png">
+		</a>
+	</div> 
+	<div class="elementosUserInfo">
+		Usuario: Default
+	</div>
+	<div id="endereçoPagina" class="elementosUserInfo">
+		
+	</div>
+	
+	<input type="file" id="htmlFileInput" accept=".html">
+	
+  	<div id='cacheON'>
+		
+	</div>
+</div>
+
+<div id="rollOut">
+	<div id="rollOutButtons">
+		<button id="addHome" onclick="MainCore()">add Home</button>
+		<button id="deleteHome" onclick="deleteLayoutDesign("barraHorizontal")">delete Home</button>
+		<button id="addEditor">add Editor</button>
+		<button id="deleteEditor">delete Editor</button>
+	</div>
+</div>
+
+<div class="barraHorizontal">
+</div>
+<iframe src="https://clideo.com/editor/" width="100%" height="100%"></iframe>
+<div class="pagination" id="pagination"></div>
+<div data-mndazid="8f663b86-1ce3-4559-9823-d48e827135c8"></div>
+</body>
+</html>
+<style>
+	body, html {
+    	height: 100%;
+	}
+
+	#ads {
+	margin: 0 auto;
+	width: 50%;	
+	}
+
+	@media (orientation: portrait) {
+		#userInfo {
+			height: 20%;
+			padding: 10px;
+			background-color: gray;
+			display: flex;
+			flex-wrap: wrap;
+		}
+	}
+	@media (orientation: landscape) {
+		#userInfo {
+			height: 100px;
+			padding: 10px;
+			background-color: gray;
+			display: flex;
+		}
+	}
+
+	@media (orientation: portrait) {
+		.elementosUserInfo {
+			padding: 3px;
+		}
+	}
+	@media (orientation: landscape) {
+		.elementosUserInfo {
+			padding: 20px;
+		}
+	}
+
+	@media (orientation: portrait) {
+		.barraHorizontal{
+			box-sizing: border-box;
+			background-color: purple;
+			display: flex;
+			flex-wrap: wrap;
+		}
+	}
+	@media (orientation: landscape) {
+		.barraHorizontal{
+			box-sizing: border-box;
+			background-color: purple;
+			display: flex;
+			flex-wrap: wrap;
+		}
+	}
+
+	@media (orientation: portrait) {
+		.menuPortfolio{
+			background-color: red;
+			flex: 30%;
+			border: 2px solid #000;
+		}
+	}
+	@media (orientation: landscape) {
+		.menuPortfolio{
+			background-color: red;
+			flex: 20%;
+			border: 2px solid #000;
+		}
+	}
+</style>
