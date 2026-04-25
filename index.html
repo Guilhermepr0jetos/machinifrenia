@@ -121,13 +121,13 @@
 	    // tenta pegar por ID
 	    const el = document.getElementById(nome);
 	    if(el){
-	        el.innerHTML = ""; // remove o elemento com esse ID
+	        el.remove(); // remove o elemento com esse ID
 	    } else {
 	        // se não for ID, tenta como classe
 	        const els = document.getElementsByClassName(nome);
 	        if(els.length > 0){
 	            // remove todos os elementos com essa classe
-	            Array.from(els).forEach(e => e.innerHTML = "");
+	            Array.from(els).forEach(e => e.remove());
 	        } else {
 	            console.warn("Nenhum elemento encontrado com id ou classe '" + nome + "'");
 	        }
@@ -236,7 +236,9 @@ function abrirHTMLLocal(event) {
 }
 
 document.getElementById("htmlFileInput").addEventListener("change", abrirHTMLLocal);
-document.getElementById("addHome").addEventListener("click", MainCore);
+document.getElementById("addHome").addEventListener("click", () => {
+	createGameList(gamesData);
+});
 document.getElementById("deleteHome").addEventListener("click", () => {
 	deleteLayoutDesign("barraHorizontal");
 });
