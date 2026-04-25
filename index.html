@@ -392,12 +392,12 @@ MainCore().then(() => {
     }
 
 function createGameList(data) {
-	let antigaBarra = document.querySelectorAll(".barraHorizontal");
+	let antigaBarra = document.querySelectorAll(".vitrineBarra");
 	antigaBarra.forEach(el => el.remove());
 
 	let Barra = document.createElement("div");
-	Barra.className = "barraHorizontal";
-	document.body.appendChild(Barra);
+	Barra.className = "vitrineBarra";
+	document.body.querySelector(".barraHorizontal").appendChild(Barra);
 
 	// Calcular os índices de início e fim da página atual
         const indiceInicio = (paginaAtual - 1) * itensPorPagina;
