@@ -28,6 +28,15 @@
 	</div>
 </div>
 
+<div id="rollOut">
+	<div id="rollOutButtons">
+		<button id="addHome" onclick="MainCore()">add Home</button>
+		<button id="deleteHome" onclick="deleteLayoutDesign("barraHorizontal")">delete Home</button>
+		<button id="addEditor">add Editor</button>
+		<button id="deleteEditor">delete Editor</button>
+	</div>
+</div>
+
 <div class="barraHorizontal">
 </div>
 <iframe src="https://clideo.com/editor/" width="100%" height="100%"></iframe>
@@ -108,6 +117,10 @@
 </style>
 <script>
 
+	function deleteLayoutDesign(let nomeID){
+		document.getElementById(nomeID).innerHTML = "";
+	}
+	
 	if(window.location.href.includes("https://guilhermepr0jetos.github.io/machinifrenia")){
 		let userDIV = document.getElementById("conta");
 
