@@ -159,6 +159,7 @@ const BDbancoDeDados = [
 
 						//cache CDN
 					    'https://guilhermepr0jetos.github.io/machinifrenia/cdn/BD.html',
+                        'https://contentdeliverynetworkmchfrenia.helioho.st/www.mchfrenia.com/BD.html',
 						'https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/BD.html'
 					   ];
 
@@ -205,7 +206,7 @@ function processarHTML(data) {
   games.forEach(g => {
     if (g.Name && g.Thumb && g.Description) {
       newGameID += 1;
-      let cdn = `https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/teste${newGameID}.html`;
+      let cdn = `https://contentdeliverynetworkmchfrenia.helioho.st/www.mchfrenia.com/teste${newGameID}.html`;
       let link = "rendergame/index.html?gamelinkid=" + cdn;
       if (g.Description.includes("redirect2324") && g.Redirect) {
         link = g.Redirect;
@@ -282,7 +283,7 @@ blocks.forEach(block => {
 			if (g.Name && g.Thumb && g.Description) {
 				newGameID += 1
 				console.log(newGameID)
-	    			let cdn = `https://contentdeliverynetworkmchfrenia.on.drv.tw/www.mchfrenia.com/teste${newGameID}.html`;
+	    			let cdn = `https://contentdeliverynetworkmchfrenia.helioho.st/www.mchfrenia.com/teste${newGameID}.html`;
             			//const created_at = item.created_at;
 						let link = "rendergame/index.html?gamelinkid=" + cdn;
 						if(g.Description.includes("redirect2324")){
