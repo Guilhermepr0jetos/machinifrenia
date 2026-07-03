@@ -21,6 +21,58 @@
 
 <script>
 
+	const googleSites = false;
+
+    if (googleSites) {
+      // Cria o input dinamicamente
+      const input = document.createElement("input");
+      input.type = "text";
+      input.id = "urlInput";
+      input.style.width = "80%";
+      input.placeholder = "Cole aqui a URL completa do Google Sites";
+
+      // Cria o botão
+      const button = document.createElement("button");
+      button.textContent = "Processar";
+      button.id = "processButton";
+      button.onclick = processUrl;
+
+      // Adiciona tudo ao container
+      let container = document.getElementById("container");
+	  if (!container) {
+	  	container = document.createElement("div");
+	  	container.id = "container";
+	  	document.body.appendChild(container);
+	  }
+      container.appendChild(input);
+      container.appendChild(button);
+    }
+
+    function processUrl() {
+      const urlText = document.getElementById("urlInput").value;
+
+      try {
+        const urlObj = new URL(urlText);
+        const params = new URLSearchParams(urlObj.search);
+        const gameLinkId = params.get("gamelinkid");
+
+        if (gameLinkId) {
+		  renderHtmlPage(gameLinkId);
+        } else {
+          console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
+        }
+      } catch (e) {
+        document.getElementById("output").textContent =
+          "URL inválida. Verifique e tente novamente.";
+      }
+
+      // 🔥 Remove input e botão após executar
+      const input = document.getElementById("urlInput");
+      const button = document.getElementById("processButton");
+      if (input) input.remove();
+      if (button) button.remove();
+    }
+
     // Obter a URL atual
     const urlParams = new URLSearchParams(window.location.search);
 
@@ -29,7 +81,11 @@
     alert(idGame);
             //const recentHtmlGame = selectGameIdByCreatedAt(data, idGame);
     console.log(idGame);
-    renderHtmlPage(idGame);
+    if (idGame && typeof idGame === "string") {
+	  renderHtmlPage(idGame);
+	} else {
+	  console.error("Parâmetro gamelinkid não encontrado ou inválido.");
+	}
 	
 	// Função para selecionar o gameid com base no parâmetro created_at do gameid
 function selectGameIdByCreatedAt(jsonData, createdAt) {
@@ -48,7 +104,10 @@ function selectGameIdByCreatedAt(jsonData, createdAt) {
     document.body.appendChild(iframe);
 
     // Substitui o marcador especial #ESPECIAL# por &&
-    htmlContent = htmlContent.replace(/#ESPECIAL#/g, '&&');
+    // Só aplica replace se houver marcador especial
+    if (htmlContent.includes("#ESPECIAL#")) {
+    	htmlContent = htmlContent.replace(/#ESPECIAL#/g, '&&');
+  	}
 
     iframe.src = htmlContent;
     //console.log(iframe.contentDocument.documentElement.outerHTML);
