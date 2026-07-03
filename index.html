@@ -117,6 +117,12 @@
 </style>
 <script>
 
+	//fallback for googleSites!
+	const googleSites = false;
+
+	//redirect direct to cdn, no rendergame necessary
+	const redirectAllToDestination = false;
+
 	function deleteLayoutDesign(nome){
 	    // tenta pegar por ID
 	    const el = document.getElementById(nome);
@@ -206,7 +212,15 @@ function processarHTML(data) {
     if (g.Name && g.Thumb && g.Description) {
       newGameID += 1;
       let cdn = `https://contentdeliverynetworkmchfrenia.helioho.st/www.mchfrenia.com/teste${newGameID}.html`;
-      let link = "rendergame/index.html?gamelinkid=" + cdn;
+      let link;
+	  if (googleSites == true){
+		  link = "https://sites.google.com/view/machinifrenia/rendergame?gamelinkid=" + cdn
+	  } else if (googleSites == false) {
+		  link = "rendergame/index.html?gamelinkid=" + cdn
+	  }
+	  if (redirectAllToDestination == true) {
+		  link = cdn;
+	  }
       if (g.Description.includes("redirect2324") && g.Redirect) {
         link = g.Redirect;
       }
@@ -248,9 +262,11 @@ fetch(BDbancoDeDados[bdID], {
   cache: 'no-store'
 })
   .then(res => {
+	  console.log("System! using DB: "+BDbancoDeDados[bdID])
 	  if(!res.ok){
 		  bdID++;
 		  tentarFonte();
+		  console.log("System! using DB: "+BDbancoDeDados[bdID])
 		  throw new Error(`Fonte ${bdID-1} respondeu com status ${res.status}`);
 	  }
 	  return res.text();
@@ -284,7 +300,18 @@ blocks.forEach(block => {
 				console.log(newGameID)
 	    			let cdn = `https://contentdeliverynetworkmchfrenia.helioho.st/www.mchfrenia.com/teste${newGameID}.html`;
             			//const created_at = item.created_at;
-						let link = "rendergame/index.html?gamelinkid=" + cdn;
+						let link;
+						if (redirectAllToDestination == true) {
+						  	link = cdn;
+					  	}
+						if (googleSites == true){
+						  	link = "https://sites.google.com/view/machinifrenia/rendergame?gamelinkid=" + cdn
+					  	} else if (googleSites == false) {
+						  	link = "rendergame/index.html?gamelinkid=" + cdn
+					  	}
+						if (redirectAllToDestination == true) {
+						  	link = cdn;
+					  	}
 						if(g.Description.includes("redirect2324")){
 							link = `${g.Redirect}`
 						}
