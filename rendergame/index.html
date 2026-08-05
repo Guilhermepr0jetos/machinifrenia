@@ -57,15 +57,15 @@
         const urlObj = new URL(urlText);
         const params = new URLSearchParams(urlObj.search);
         const gameLinkId = params.get("gamelinkid");
+		const site = prompt("Insira o website aqui! / Put website here!");
 
 		if (BuildWebsitebyCopyPaste) {
-		  const site = prompt("Insira o website aqui! / Put website here!");
 		  if (site && gameLinkId) {
 		    renderHtmlPage(site, true);
 		  } else {
 		    console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
 		  }
-		} else if (BuildWebsitebyCopyPaste === false && gameLinkId || site === null) {
+		} else if (site === null || BuildWebsitebyCopyPaste === false && gameLinkId) {
 		  alert("Nenhum dado informado.");
 		  renderHtmlPage(gameLinkId, false);
 		} else {
@@ -92,18 +92,16 @@
             //const recentHtmlGame = selectGameIdByCreatedAt(data, idGame);
     console.log(idGame);
     if (idGame && typeof idGame === "string") {
-	  if (BuildWebsitebyCopyPaste) {
-		  const site = prompt("Insira o website aqui! / Put website here!");
+	  const site = prompt("Insira o website aqui! / Put website here!");
+	  if (BuildWebsitebyCopyPaste && idGame) {
 		  if (site && idGame) {
 		    renderHtmlPage(site, true);
 		  } else {
 		    console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
 		  }
-		} else if (BuildWebsitebyCopyPaste === false && idGame || site === null) {
+		} else if (site === null || BuildWebsitebyCopyPaste === false && idGame) {
 		  alert("Nenhum dado informado.");
 		  renderHtmlPage(idGame, false);
-		} else {
-		  console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
 		}
 	} else {
 	  console.error("Parâmetro gamelinkid não encontrado ou inválido.");
