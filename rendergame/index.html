@@ -61,7 +61,7 @@
 		if (BuildWebsitebyCopyPaste) {
 		  const site = prompt("Insira o website aqui! / Put website here!");
 		  if (site && gameLinkId) {
-		    renderHtmlPage(gameLinkId, true);
+		    renderHtmlPage(site, true);
 		  } else {
 		    console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
 		  }
@@ -95,7 +95,7 @@
 	  if (BuildWebsitebyCopyPaste) {
 		  const site = prompt("Insira o website aqui! / Put website here!");
 		  if (site && idGame) {
-		    renderHtmlPage(idGame, true);
+		    renderHtmlPage(site, true);
 		  } else {
 		    console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
 		  }
