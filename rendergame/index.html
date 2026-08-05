@@ -65,7 +65,7 @@
 		  } else {
 		    console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
 		  }
-		} else if (BuildWebsitebyCopyPaste === false && gameLinkId) {
+		} else if (BuildWebsitebyCopyPaste === false && gameLinkId || site === null) {
 		  alert("Nenhum dado informado.");
 		  renderHtmlPage(gameLinkId, false);
 		} else {
@@ -99,7 +99,7 @@
 		  } else {
 		    console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
 		  }
-		} else if (BuildWebsitebyCopyPaste === false && idGame) {
+		} else if (BuildWebsitebyCopyPaste === false && idGame || site === null) {
 		  alert("Nenhum dado informado.");
 		  renderHtmlPage(idGame, false);
 		} else {
