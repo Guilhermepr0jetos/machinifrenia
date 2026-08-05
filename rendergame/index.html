@@ -92,7 +92,19 @@
             //const recentHtmlGame = selectGameIdByCreatedAt(data, idGame);
     console.log(idGame);
     if (idGame && typeof idGame === "string") {
-	  renderHtmlPage(idGame);
+	  if (BuildWebsitebyCopyPaste) {
+		  const site = prompt("Insira o website aqui! / Put website here!");
+		  if (site && idGame) {
+		    renderHtmlPage(idGame, true);
+		  } else {
+		    console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
+		  }
+		} else if (BuildWebsitebyCopyPaste === false && idGame) {
+		  alert("Nenhum dado informado.");
+		  renderHtmlPage(idGame, false);
+		} else {
+		  console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
+		}
 	} else {
 	  console.error("Parâmetro gamelinkid não encontrado ou inválido.");
 	}
