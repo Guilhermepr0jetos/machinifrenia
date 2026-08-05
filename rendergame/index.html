@@ -57,19 +57,18 @@
         const gameLinkId = params.get("gamelinkid");
 
 		if (BuildWebsitebyCopyPaste) {
-			const site = prompt("Insira o website aqui! / Put website here!");
-		      if (site && gameLinkId) {
-		        renderHtmlPage(gameLinkId, true);
-		      } else {
-	          	console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
-	          } else if (BuildWebsitebyCopyPaste == false && gameLinkId) {
-		        alert("Nenhum dado informado.");
-				renderHtmlPage(gameLinkId, false);
-		      } else {
-	          	console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
-	          }
+		  const site = prompt("Insira o website aqui! / Put website here!");
+		  if (site && gameLinkId) {
+		    renderHtmlPage(gameLinkId, true);
+		  } else {
+		    console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
+		  }
+		} else if (BuildWebsitebyCopyPaste === false && gameLinkId) {
+		  alert("Nenhum dado informado.");
+		  renderHtmlPage(gameLinkId, false);
+		} else {
+		  console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
 		}
-        
       } catch (e) {
         document.getElementById("output").textContent =
           "URL inválida. Verifique e tente novamente.";
