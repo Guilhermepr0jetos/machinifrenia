@@ -56,11 +56,20 @@
         const params = new URLSearchParams(urlObj.search);
         const gameLinkId = params.get("gamelinkid");
 
-        if (gameLinkId) {
-		  renderHtmlPage(gameLinkId);
-        } else {
-          console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
-        }
+		if (BuildWebsitebyCopyPaste) {
+			const site = prompt("Insira o website aqui! / Put website here!");
+		      if (site && gameLinkId) {
+		        renderHtmlPage(gameLinkId, true);
+		      } else {
+	          	console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
+	          } else if (BuildWebsitebyCopyPaste == false && && gameLinkId) {
+		        alert("Nenhum dado informado.");
+				renderHtmlPage(gameLinkId, false);
+		      } else {
+	          	console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
+	          }
+		}
+        
       } catch (e) {
         document.getElementById("output").textContent =
           "URL inválida. Verifique e tente novamente.";
@@ -72,6 +81,8 @@
       if (input) input.remove();
       if (button) button.remove();
     }
+
+	const BuildWebsitebyCopyPaste = true
 
     // Obter a URL atual
     const urlParams = new URLSearchParams(window.location.search);
@@ -99,7 +110,7 @@ function selectGameIdByCreatedAt(jsonData, createdAt) {
     return selectedGameId;
 }
 
-    function renderHtmlPage(htmlContent) {
+    function renderHtmlPage(htmlContent, isPossibleToRunViaSRCDOC) {
     const iframe = document.createElement('iframe');
     document.body.appendChild(iframe);
 
@@ -109,7 +120,12 @@ function selectGameIdByCreatedAt(jsonData, createdAt) {
     	htmlContent = htmlContent.replace(/#ESPECIAL#/g, '&&');
   	}
 
-    iframe.src = htmlContent;
+	if (isPossibleToRunViaSRCDOC){
+		iframe.srcdoc = htmlContent;
+	} else {
+		iframe.src = htmlContent;
+	}
+    
     //console.log(iframe.contentDocument.documentElement.outerHTML);
     //iframe.contentDocument.close();
 
