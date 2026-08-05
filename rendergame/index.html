@@ -61,15 +61,15 @@
 
 		if (BuildWebsitebyCopyPaste) {
 		  if (site && gameLinkId) {
-		    renderHtmlPage(site, true);
-		  } else {
-		    console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
+		    renderHtmlPage(site, true)
+		  } else if (site === null || BuildWebsitebyCopyPaste === false && gameLinkId) {
+			  alert("Nenhum dado informado.");
+			  console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
+			  renderHtmlPage(gameLinkId, false);
 		  }
-		} else if (site === null || BuildWebsitebyCopyPaste === false && gameLinkId) {
-		  alert("Nenhum dado informado.");
-		  renderHtmlPage(gameLinkId, false);
 		} else {
-		  console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
+		  renderHtmlPage(gameLinkId, false);
+		  console.error("BuildWebsitebyCopyPaste = false");
 		}
       } catch (e) {
         document.getElementById("output").textContent =
@@ -96,12 +96,14 @@
 	  if (BuildWebsitebyCopyPaste && idGame) {
 		  if (site && idGame) {
 		    renderHtmlPage(site, true);
-		  } else {
-		    console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
-		  }
-		} else if (site === null || BuildWebsitebyCopyPaste === false && idGame) {
-		  alert("Nenhum dado informado.");
+		  } else if (site === null || BuildWebsitebyCopyPaste === false && idGame) {
+			  alert("Nenhum dado informado.");
+			  console.error("Nenhum parâmetro gamelinkid encontrado na URL.");
+			  renderHtmlPage(idGame, false);
+			}
+		} else {
 		  renderHtmlPage(idGame, false);
+		  console.error("BuildWebsitebyCopyPaste = false");
 		}
 	} else {
 	  console.error("Parâmetro gamelinkid não encontrado ou inválido.");
