@@ -23,6 +23,8 @@
 
 	const googleSites = false;
 
+	const BuildWebsitebyCopyPaste = true
+
     if (googleSites) {
       // Cria o input dinamicamente
       const input = document.createElement("input");
@@ -80,8 +82,6 @@
       if (input) input.remove();
       if (button) button.remove();
     }
-
-	const BuildWebsitebyCopyPaste = true
 
     // Obter a URL atual
     const urlParams = new URLSearchParams(window.location.search);
